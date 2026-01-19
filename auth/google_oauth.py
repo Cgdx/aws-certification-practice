@@ -11,12 +11,17 @@ from urllib.parse import urlencode
 def get_secret(key: str, default: str = "") -> str:
     """Get secret from Streamlit secrets or environment variables."""
     try:
-        return st.secrets.get(key, os.environ.get(key, default))
+        if hasattr(st, 'secrets') and key in st.secrets:
+            return st.secrets[key]
     except Exception:
-        return os.environ.get(key, default)
+        pass
+    return os.environ.get(key, default)
 
-GOOGLE_CLIENT_ID = get_secret("GOOGLE_CLIENT_ID")
-GOOGLE_CLIENT_SECRET = get_secret("GOOGLE_CLIENT_SECRET")
+def get_client_id() -> str:
+    return get_secret("GOOGLE_CLIENT_ID")
+
+def get_client_secret() -> str:
+    return get_secret("GOOGLE_CLIENT_SECRET")
 
 # Scopes for Google OAuth
 SCOPES = [
@@ -30,11 +35,12 @@ def get_google_oauth_url(redirect_uri: str) -> Optional[str]:
     """
     Generate the Google OAuth authorization URL.
     """
-    if not GOOGLE_CLIENT_ID:
+    client_id = get_client_id()
+    if not client_id:
         return None
 
     params = {
-        "client_id": GOOGLE_CLIENT_ID,
+        "client_id": client_id,
         "redirect_uri": redirect_uri,
         "response_type": "code",
         "scope": " ".join(SCOPES),
@@ -52,13 +58,15 @@ def exchange_code_for_token(code: str, redirect_uri: str) -> Optional[dict]:
     """
     import requests
 
-    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+    client_id = get_client_id()
+    client_secret = get_client_secret()
+    if not client_id or not client_secret:
         return None
 
     token_url = "https://oauth2.googleapis.com/token"
     data = {
-        "client_id": GOOGLE_CLIENT_ID,
-        "client_secret": GOOGLE_CLIENT_SECRET,
+        "client_id": client_id,
+        "client_secret": client_secret,
         "code": code,
         "grant_type": "authorization_code",
         "redirect_uri": redirect_uri
@@ -105,7 +113,7 @@ def verify_id_token(token: str) -> Optional[dict]:
         idinfo = id_token.verify_oauth2_token(
             token,
             google_requests.Request(),
-            GOOGLE_CLIENT_ID
+            get_client_id()
         )
         return idinfo
     except Exception as e:
@@ -169,7 +177,7 @@ def get_redirect_uri() -> str:
 
 def is_google_oauth_configured() -> bool:
     """Check if Google OAuth is properly configured."""
-    return bool(GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET)
+    return bool(get_client_id() and get_client_secret())
 
 
 def render_google_oauth_setup_instructions():
