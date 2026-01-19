@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz</title>
+    <style>
+      * {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+          Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-size: 16px;
+      }
+
+      main {
+        padding-top: 48px;
+      }
+
+      :root {
+        --large-device-width: 850px;
+        --primary-color: #0f172a;
+        --secondary-color: #020617;
+        --primary-text-color: #c7d1dd;
+        --secondary-text-color: #061602;
+        --success-background: hsl(159, 82%, 24%);
+        --success-foreground: hsl(164, 86%, 16%);
+        --success: hsl(160, 84%, 39%);
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --info-background: hsl(218, 81%, 8%);
+        --info-foreground: hsl(217, 91%, 85%);
+        --border-color: #d1d7dc;
+        --check-box-size: 20px;
+        /* control the size */
+        --check-box-color: var(--info-foreground);
+        /* the active color */
+      }
+
+      body {
+        position: relative;
+        background-color: #020617;
+        color: var(--primary-text-color);
+      }
+
+      #score-stats-container {
+        position: fixed;
+        z-index: 10;
+        top: 0;
+        height: 40px;
+        width: 100%;
+        background-color: var(--info-background);
+
+        padding: 0px 16px;
+        color: var(--info-foreground);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      #quiz-container {
+        border-radius: 8px;
+        display: flex;
+        gap: 16px;
+        flex-direction: column;
+      }
+
+      input[type='radio'] {
+        height: var(--check-box-size);
+        aspect-ratio: 1;
+        border: calc(var(--check-box-size) / 8) solid #939393;
+        padding: calc(var(--check-box-size) / 8);
+        background: radial-gradient(farthest-side, var(--check-box-color) 94%, #0000) 50%/0 0 no-repeat
+          content-box;
+        border-radius: 50%;
+        outline-offset: calc(var(--check-box-size) / 10);
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        cursor: pointer;
+        font-size: inherit;
+        transition: 0.3s;
+      }
+
+      input[type='radio']:checked {
+        border-color: var(--check-box-color);
+        background-size: 100% 100%;
+      }
+
+      input[type='radio']:disabled {
+        background: linear-gradient(#939393 0 0) 50%/100% 20% no-repeat content-box;
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      label {
+        /* display: inline-flex; */
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        padding: 4px 6px;
+        border-radius: 4px;
+      }
+
+      @media (max-width: 767px) {
+        input[type='radio'],
+        label {
+          cursor: default;
+        }
+
+        #quiz-container {
+          margin-left: 8px;
+          margin-right: 8px;
+        }
+      }
+
+      /* PC (Desktop devices) */
+      @media (min-width: 768px) {
+        body {
+          display: flex;
+          justify-content: center;
+        }
+
+        main {
+          max-width: var(--large-device-width);
+        }
+
+        #score-stats-container {
+          max-width: var(--large-device-width);
+        }
+
+        dialog {
+          max-width: var(--large-device-width);
+        }
+      }
+
+      @media print {
+        input[type='radio'] {
+          background: none !important;
+          border-color: #939393 !important;
+        }
+
+        input[type='radio']:checked {
+          border-color: #939393 !important;
+        }
+      }
+
+      .question-lable {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      button {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        outline: none;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+      }
+
+      .button {
+        background-color: var(--success-background);
+        border: none;
+        color: #f4f5f7;
+        opacity: 0.8;
+        font-size: 18px;
+        flex-grow: 1;
+        padding: 8px 16px;
+        border-radius: 8px;
+      }
+
+      .button:hover {
+        opacity: 1;
+      }
+
+      .explanation-btn {
+        border: none;
+        color: var(--success);
+        background-color: transparent;
+      }
+
+      #submit-button:active::after {
+        background-color: #ef4444;
+      }
+
+      .single-question-container {
+        background-color: var(--primary-color);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 16px;
+        border-radius: 8px;
+      }
+
+      #modal-content {
+        padding: 16px;
+        line-height: 24px;
+      }
+
+      dialog::backdrop {
+        background: rgba(0, 0, 0, 0.5);
+      }
+
+      dialog {
+        position: fixed;
+        border: 1px solid var(--border-color);
+        background-color: var(--primary-color);
+        color: rgb(240, 241, 248);
+        padding: 16px;
+        border-radius: 8px;
+        width: 80vw;
+        max-height: 80vh;
+        overflow: auto;
+        top: 50%;
+        left: 50%;
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        -moz-transform: translateX(-50%) translateY(-50%);
+        -ms-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+      }
+
+      #close-modal-btn {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        padding: 2px 8px;
+        border-radius: 2px;
+        border: none;
+        background-color: var(--danger);
+      }
+
+      .correct-answer label {
+        border: 2px solid var(--success);
+        width: 100%;
+      }
+
+      .incorrect-answer label {
+        border: 2px solid var(--danger);
+        width: 100%;
+      }
+
+      .options-container {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      #quiz-meta-container {
+        border-radius: 8px;
+        background-color: var(--primary-color);
+        margin-bottom: 12px;
+        padding: 8px;
+      }
+
+      #quiz-title {
+        text-align: center;
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+
+      #quiz-description {
+        line-height: 1.5;
+        padding: 2px 6px;
+      }
+      img {
+        width: 100%;
+      }
+    </style>
+  </head>
+
+  <body onload="main()">
+    <main>
+      <section id="quiz-meta-container">
+        <h1 id="quiz-title"></h1>
+        <p id="quiz-description"></p>
+      </section>
+      <section id="score-stats-container">
+        <div id="score-card">
+          Score: <span id="current-score">999</span> of
+          <span id="pass-percent">999%</span>
+        </div>
+        <div>Correct: <span id="correct-answers">999</span></div>
+        <div>Incorrect: <span id="wrong-answers">999</span></div>
+      </section>
+
+      <section id="quiz-container"></section>
+
+      <dialog id="modal" class="modal-container">
+        <div id="modal-content">
+          <p id="modal-text"></p>
+        </div>
+      </dialog>
+    </main>
+
+    <script>
+      const quizData = {"quiz_id":5336165,"quiz_title":"RDS, Aurora, & ElastiCache Quiz","questions":[{"_class":"assessment","id":37559173,"assessment_type":"multiple-choice","prompt":{"question":"<p>Amazon RDS supports the following databases, <strong>EXCEPT</strong>:</p>","feedbacks":["RDS supports MySQL, PostgreSQL, MariaDB, Oracle, MS SQL Server, and Amazon Aurora.","","",""],"answers":["<p>MongoDB</p>","<p>MySQL</p>","<p>MariaDB</p>","<p>Microsoft SQL Server</p>"],"relatedLectureIds":""},"correct_response":["a"],"section":"","question_plain":"Amazon RDS supports the following databases, EXCEPT:","related_lectures":[]},{"_class":"assessment","id":37559185,"assessment_type":"multiple-choice","prompt":{"relatedLectureIds":"","feedbacks":["Read Replicas don't help with disaster recovery, it helps then you want to scale reads across AZs.","","Multi-AZ helps when you plan a disaster recovery for an entire AZ going down. If you plan against an entire AWS Region going down, you should use backups and replication across AWS Regions."],"question":"<p>You're planning for a new solution that requires a MySQL database that must be available even in case of a disaster in one of the Availability Zones. What should you use?</p>","answers":["<p>Create Read Replicas</p>","<p>Enable Encryption</p>","<p>Enable Multi-AZ</p>"]},"correct_response":["c"],"section":"","question_plain":"You're planning for a new solution that requires a MySQL database that must be available even in case of a disaster in one of the Availability Zones. What should you use?","related_lectures":[]},{"_class":"assessment","id":37559197,"assessment_type":"multiple-choice","prompt":{"relatedLectureIds":"","question":"<p>We have an RDS database that struggles to keep up with the demand of requests from our website. Our million users mostly read news, and we don't post news very often. Which solution is <strong>NOT</strong> adapted to this problem?</p>","feedbacks":["","Be very careful with the way you read questions at the exam. Here, the question is asking which solution is NOT adapted to this problem. ElastiCache and RDS Read Replicas do indeed help with scaling reads.",""],"answers":["<p>An ElastiCache Cluster</p>","<p>RDS Multi-AZ</p>","<p>RDS Read Replicas</p>"]},"correct_response":["b"],"section":"","question_plain":"We have an RDS database that struggles to keep up with the demand of requests from our website. Our million users mostly read news, and we don't post news very often. Which solution is NOT adapted to this problem?","related_lectures":[]},{"_class":"assessment","id":37559203,"assessment_type":"multiple-choice","prompt":{"relatedLectureIds":"","answers":["<p>There must be a bug in your application</p>","<p>Read Replicas have Asynchronous Replication, therefore it's likely your users will only read Eventual Consistency</p>","<p>You should have setup Multi-AZ instead</p>"],"question":"<p>You have set up read replicas on your RDS database, but users are complaining that upon updating their social media posts, they do not see their updated posts right away. What is a possible cause for this?</p>","feedbacks":["","",""]},"correct_response":["b"],"section":"","question_plain":"You have set up read replicas on your RDS database, but users are complaining that upon updating their social media posts, they do not see their updated posts right away. What is a possible cause for this?","related_lectures":[]},{"_class":"assessment","id":37559217,"assessment_type":"multiple-choice","prompt":{"question":"<p>Which RDS <strong>(NOT Aurora)</strong> feature when used does not require you to change the SQL connection string?</p>","relatedLectureIds":"","answers":["<p>Multi-AZ</p>","<p>Read Replicas</p>"],"feedbacks":["Multi-AZ keeps the same connection string regardless of which database is up.","Read Replicas add new endpoints with their own DNS name. We need to change our application to reference them individually to balance the read load."]},"correct_response":["a"],"section":"","question_plain":"Which RDS (NOT Aurora) feature when used does not require you to change the SQL connection string?","related_lectures":[]},{"_class":"assessment","id":37559227,"assessment_type":"multiple-choice","prompt":{"feedbacks":["","RDS could work to store session data, but wouldn't provide you with high performance as ElastiCache.","Storing Session Data in ElastiCache is a common pattern to ensuring different EC2 instances can retrieve your user's state if needed.","By default, EBS volumes can not be attached to multiple EC2 instances. You can use EBS Multi-Attach, but it has certain limitations. Also, EBS volumes wouldn't provide you with high performance as ElastiCache."],"answers":["<p>Use your own custom Load Balancer on EC2 instances instead of using ALB</p>","<p>Store session data in RDS</p>","<p>Store session data in ElastiCache</p>","<p>Store session data in a shared EBS volume</p>"],"question":"<p>Your application running on a fleet of EC2 instances managed by an Auto Scaling Group behind an Application Load Balancer. Users have to constantly log back in and you don't want to enable Sticky Sessions on your ALB as you fear it will overload some EC2 instances. What should you do?</p>","relatedLectureIds":""},"correct_response":["c"],"section":"","question_plain":"Your application running on a fleet of EC2 instances managed by an Auto Scaling Group behind an Application Load Balancer. Users have to constantly log back in and you don't want to enable Sticky Sessions on your ALB as you fear it will overload some EC2 instances. What should you do?","related_lectures":[]},{"_class":"assessment","id":37559235,"assessment_type":"multiple-choice","prompt":{"feedbacks":["Read Replicas will help as your analytics application can now perform queries against it, and these queries won't impact the main production RDS database.","Multi-AZ is used for high availability, meaning that the standby DB instance can't be used by our applications.","This won't be suitable here as the question mentioned that analytics queries can be run any time of the day."],"answers":["<p>Setup a Read Replica</p>","<p>Setup Multi-AZ</p>","<p>Run the analytics queries at night</p>"],"relatedLectureIds":"","question":"<p>An analytics application is currently performing its queries against your main production RDS database. These queries run at any time of the day and slow down the RDS database which impacts your users' experience. What should you do to improve the users' experience?</p>"},"correct_response":["a"],"section":"","question_plain":"An analytics application is currently performing its queries against your main production RDS database. These queries run at any time of the day and slow down the RDS database which impacts your users' experience. What should you do to improve the users' experience?","related_lectures":[]},{"_class":"assessment","id":37559249,"assessment_type":"multiple-choice","prompt":{"relatedLectureIds":"","feedbacks":["Read Replicas cannot help with disaster recovery.","Multi-AZ won't help when a disaster happens at the AWS region level. Multi-AZ helps when a disaster happens at the AZ level.","Read Replicas cannot help with disaster recovery.","Aurora Global Databases allows you to have an Aurora Replica in another AWS Region, with up to 5 secondary regions."],"answers":["<p>RDS Read Replicas</p>","<p>RDS Multi-AZ</p>","<p>Aurora Read Replicas</p>","<p>Aurora Global Database</p>"],"question":"<p>You would like to ensure you have a replica of your database available in another AWS Region if a disaster happens to your main AWS Region. Which database do you recommend to implement this easily?</p>"},"correct_response":["d"],"section":"","question_plain":"You would like to ensure you have a replica of your database available in another AWS Region if a disaster happens to your main AWS Region. Which database do you recommend to implement this easily?","related_lectures":[]},{"_class":"assessment","id":37559319,"assessment_type":"multiple-choice","prompt":{"question":"<p>How can you enhance the security of your ElastiCache Redis Cluster by allowing users to access your ElastiCache Redis Cluster using their IAM&nbsp;Identities&nbsp;(e.g., Users, Roles)?</p>","relatedLectureIds":"","feedbacks":["Using Redis Authentication, Redis requires a password before allowing clients to run commands.","","Security Groups helps filter traffic going to your ElastiCache Redis Cluster instances but cannot help with application-level authentication."],"answers":["<p>Using Redis Authentication</p>","<p>Using IAM&nbsp;Authentication</p>","<p>Use Security Groups</p>"]},"correct_response":["b"],"section":"","question_plain":"How can you enhance the security of your ElastiCache Redis Cluster by allowing users to access your ElastiCache Redis Cluster using their IAM&nbsp;Identities&nbsp;(e.g., Users, Roles)?","related_lectures":[]},{"_class":"assessment","id":37559325,"assessment_type":"multiple-choice","prompt":{"relatedLectureIds":"","feedbacks":["","",""],"question":"<p>Your company has a production Node.js application that is using RDS MySQL 5.6 as its database. A new application programmed in Java will perform some heavy analytics workload to create a dashboard on a regular hourly basis. What is the most cost-effective solution you can implement to minimize disruption for the main application?</p>","answers":["<p>Enable Multi-AZ for the RDS database and run the analytics workload on the standby database</p>","<p>Create a Read Replica in a different AZ and run the analytics workload on the replica database</p>","<p>Create a Read Replica in a different AZ and run the analytics workload on the source database</p>"]},"correct_response":["b"],"section":"","question_plain":"Your company has a production Node.js application that is using RDS MySQL 5.6 as its database. A new application programmed in Java will perform some heavy analytics workload to create a dashboard on a regular hourly basis. What is the most cost-effective solution you can implement to minimize disruption for the main application?","related_lectures":[]},{"_class":"assessment","id":37559337,"assessment_type":"multiple-choice","prompt":{"answers":["<p>Create a Read Replica in the same region and enable Multi-AZ on the main database</p>","<p>Create a Read Replica in a different region and enable Multi-AZ on the Read Replica</p>","<p>Create a Read Replica in the same region and enable Multi-AZ on the Read Replica</p>","<p>Enable Multi-Region option on the main database</p>"],"feedbacks":["","","",""],"question":"<p>You would like to create a disaster recovery strategy for your RDS PostgreSQL database so that in case of a regional outage the database can be quickly made available for both read and write workloads in another AWS Region. The DR database must be highly available. What do you recommend?</p>","relatedLectureIds":""},"correct_response":["b"],"section":"","question_plain":"You would like to create a disaster recovery strategy for your RDS PostgreSQL database so that in case of a regional outage the database can be quickly made available for both read and write workloads in another AWS Region. The DR database must be highly available. What do you recommend?","related_lectures":[]},{"_class":"assessment","id":37559349,"assessment_type":"multiple-choice","prompt":{"feedbacks":["","",""],"relatedLectureIds":"","question":"<p>You have migrated the MySQL database from on-premises to RDS. You have a lot of applications and developers interacting with your database. Each developer has an IAM user in the company's AWS account. What is a suitable approach to give access to developers to the MySQL RDS DB instance instead of creating a DB user for each one?</p>","answers":["<p>By default IAM users have access to your RDS database</p>","<p>Use Amazon Cognito</p>","<p>Enable IAM Database Authentication</p>"]},"correct_response":["c"],"section":"","question_plain":"You have migrated the MySQL database from on-premises to RDS. You have a lot of applications and developers interacting with your database. Each developer has an IAM user in the company's AWS account. What is a suitable approach to give access to developers to the MySQL RDS DB instance instead of creating a DB user for each one?","related_lectures":[]},{"_class":"assessment","id":37559419,"assessment_type":"multiple-choice","prompt":{"feedbacks":["","","",""],"answers":["<p>Read Replica uses Asynchronous Replication and Multi-AZ uses Asynchronous Replication</p>","<p>Read Replica uses Asynchronous Replication and Multi-AZ uses Synchronous Replication</p>","<p>Read Replica uses Synchronous Replication and Multi-AZ uses Synchronous Replication</p>","<p>Read Replica uses Synchronous Replication and Multi-AZ uses Asynchronous Replication</p>"],"question":"<p>Which of the following statement is true regarding replication in both RDS Read Replicas and Multi-AZ?</p>","relatedLectureIds":""},"correct_response":["b"],"section":"","question_plain":"Which of the following statement is true regarding replication in both RDS Read Replicas and Multi-AZ?","related_lectures":[]},{"_class":"assessment","id":37559435,"assessment_type":"multiple-choice","prompt":{"relatedLectureIds":"","question":"<p>How do you encrypt an unencrypted RDS DB instance?</p>","answers":["<p>Do it straight from AWS Console, select your RDS DB instance, choose Actions then <strong>Encrypt using KMS</strong></p>","<p>Do it straight from AWS Console, after stopping the RDS DB instance</p>","<p>Create a snapshot of the unencrypted RDS DB instance, copy the snapshot and tick <strong>\"Enable encryption\"</strong>, then restore the RDS DB instance from the encrypted snapshot</p>"],"feedbacks":["","",""]},"correct_response":["c"],"section":"","question_plain":"How do you encrypt an unencrypted RDS DB instance?","related_lectures":[]},{"_class":"assessment","id":37559563,"assessment_type":"multiple-choice","prompt":{"question":"<p>For your RDS database, you can have up to ............ Read Replicas.</p>","relatedLectureIds":"","feedbacks":["","",""],"answers":["<p>5</p>","<p>15</p>","<p>7</p>"]},"correct_response":["b"],"section":"","question_plain":"For your RDS database, you can have up to ............ Read Replicas.","related_lectures":[]},{"_class":"assessment","id":37559571,"assessment_type":"multiple-choice","prompt":{"answers":["<p>Oracle</p>","<p>PostgreSQL</p>","<p>MySQL</p>"],"question":"<p>Which RDS database technology does <strong>NOT</strong> support IAM Database Authentication?</p>","relatedLectureIds":"","feedbacks":["","",""]},"correct_response":["a"],"section":"","question_plain":"Which RDS database technology does NOT support IAM Database Authentication?","related_lectures":[]},{"_class":"assessment","id":37559575,"assessment_type":"multiple-choice","prompt":{"feedbacks":["You can not create encrypted Read Replicas from an unencrypted RDS DB instance.",""],"question":"<p>You have an un-encrypted RDS DB instance and you want to create Read Replicas. Can you configure the RDS Read Replicas to be encrypted?</p>","answers":["<p>No</p>","<p>Yes</p>"],"relatedLectureIds":""},"correct_response":["a"],"section":"","question_plain":"You have an un-encrypted RDS DB instance and you want to create Read Replicas. Can you configure the RDS Read Replicas to be encrypted?","related_lectures":[]},{"_class":"assessment","id":37559585,"assessment_type":"multiple-choice","prompt":{"question":"<p>An application running in production is using an Aurora Cluster as its database. Your development team would like to run a version of the application in a scaled-down application with the ability to perform some heavy workload on a need-basis. Most of the time, the application will be unused. Your CIO has tasked you with helping the team to achieve this while minimizing costs. What do you suggest?</p>","relatedLectureIds":"","answers":["<p>Use an Aurora Global Database</p>","<p>Use an RDS database</p>","<p>Use Aurora Serverless</p>","<p>Run Aurora on EC2, and write a script to shut down the EC2 instance at night</p>"],"feedbacks":["","","",""]},"correct_response":["c"],"section":"","question_plain":"An application running in production is using an Aurora Cluster as its database. Your development team would like to run a version of the application in a scaled-down application with the ability to perform some heavy workload on a need-basis. Most of the time, the application will be unused. Your CIO has tasked you with helping the team to achieve this while minimizing costs. What do you suggest?","related_lectures":[]},{"_class":"assessment","id":37559591,"assessment_type":"multiple-choice","prompt":{"answers":["<p>5</p>","<p>10</p>","<p>15</p>"],"question":"<p>How many Aurora Read Replicas can you have in a single Aurora DB Cluster?</p>","feedbacks":["","",""],"relatedLectureIds":""},"correct_response":["c"],"section":"","question_plain":"How many Aurora Read Replicas can you have in a single Aurora DB Cluster?","related_lectures":[]},{"_class":"assessment","id":37559593,"assessment_type":"multiple-choice","prompt":{"answers":["<p>MySQL and MariaDB</p>","<p>MySQL and PostgreSQL</p>","<p>Oracle and MariaDB</p>","<p>Oracle and MS SQL Server</p>"],"relatedLectureIds":"","question":"<p>Amazon Aurora supports both .......................... databases.</p>","feedbacks":["","","",""]},"correct_response":["b"],"section":"","question_plain":"Amazon Aurora supports both .......................... databases.","related_lectures":[]},{"_class":"assessment","id":37559671,"assessment_type":"multiple-choice","prompt":{"question":"<p>You work as a Solutions Architect for a gaming company. One of the games mandates that players are ranked in real-time based on their score. Your boss asked you to design then implement an effective and highly available solution to create a gaming leaderboard. What should you use?</p>","relatedLectureIds":"","feedbacks":["","","",""],"answers":["<p>Use RDS for MySQL</p>","<p>Use an Amazon Aurora</p>","<p>Use ElastiCache for Memcached</p>","<p>Use ElastiCache for Redis - Sorted Sets</p>"]},"correct_response":["d"],"section":"","question_plain":"You work as a Solutions Architect for a gaming company. One of the games mandates that players are ranked in real-time based on their score. Your boss asked you to design then implement an effective and highly available solution to create a gaming leaderboard. What should you use?","related_lectures":[]},{"_class":"assessment","id":51042560,"assessment_type":"multiple-choice","prompt":{"question":"<p>You need full customization of an Oracle Database on AWS. You would like to benefit from using the AWS&nbsp;services. What do you recommend?&nbsp;</p>","relatedLectureIds":"","feedbacks":["","",""],"answers":["<p>RDS&nbsp;for Oracle</p>","<p>RDS&nbsp;Custom for Oracle</p>","<p>Deploy Oracle on EC2</p>"]},"correct_response":["b"],"section":"","question_plain":"You need full customization of an Oracle Database on AWS. You would like to benefit from using the AWS&nbsp;services. What do you recommend?&nbsp;","related_lectures":[]},{"_class":"assessment","id":51042570,"assessment_type":"multiple-choice","prompt":{"question":"<p>You need to store long-term backups for your Aurora database for disaster recovery and audit purposes. What do you recommend?</p>","relatedLectureIds":"","feedbacks":["The maximum retention is only 35 days","",""],"answers":["<p>Enable Automated Backups</p>","<p>Perform On Demand&nbsp;Backups</p>","<p>Use Aurora Database Cloning</p>"]},"correct_response":["b"],"section":"","question_plain":"You need to store long-term backups for your Aurora database for disaster recovery and audit purposes. What do you recommend?","related_lectures":[]},{"_class":"assessment","id":51042840,"assessment_type":"multiple-choice","prompt":{"question":"<p>Your development team would like to perform a suite of read and write tests against your production Aurora database because they need access to production data as soon as possible. What do you advise?</p>","relatedLectureIds":"","feedbacks":["This won't work for writes","This will impact your customers","This is slower than Aurora Cloning",""],"answers":["<p>Create an Aurora Read Replica for them </p>","<p>Do the test against the production database</p>","<p>Make a DB&nbsp;Snapshot and Restore it into a new database</p>","<p>Use the Aurora Cloning feature</p>"]},"correct_response":["d"],"section":"","question_plain":"Your development team would like to perform a suite of read and write tests against your production Aurora database because they need access to production data as soon as possible. What do you advise?","related_lectures":[]},{"_class":"assessment","id":51042852,"assessment_type":"multiple-choice","prompt":{"question":"<p>You have 100 EC2 instances connected to your RDS&nbsp;database and you see that upon a maintenance of the database, all your applications take a lot of time to reconnect to RDS, due to poor application logic. How do you improve this?&nbsp;</p>","relatedLectureIds":"","feedbacks":["","","","This reduces the failover time by up to 66% and keeps connection actives for your applications"],"answers":["<p>Fix all the applications</p>","<p>Disable Multi-AZ&nbsp;</p>","<p>Enable Multi-AZ</p>","<p>Use an RDS&nbsp;Proxy</p>"]},"correct_response":["d"],"section":"","question_plain":"You have 100 EC2 instances connected to your RDS&nbsp;database and you see that upon a maintenance of the database, all your applications take a lot of time to reconnect to RDS, due to poor application logic. How do you improve this?&nbsp;","related_lectures":[]}]};
+      let correct = new Set();
+      let incorrect = new Set();
+      let totalNumberOfQuestions = 0;
+      const quizTitle = quizData.quiz_title;
+      const quizDescription = quizData.quiz_description;
+      const questionData = quizData.questions;
+      const passPercent = quizData.pass_percent;
+      const modalTextElement = document.getElementById('modal-text');
+      const quizContainerElement = document.getElementById('quiz-container');
+
+      const dialog = document.querySelector('dialog');
+      const showButton = document.getElementById('view-explanatin');
+      const closeButton = document.getElementById('close-modal-btn');
+      const quizTitleElement = document.getElementById('quiz-title');
+      const quizDescriptionElement = document.getElementById('quiz-description');
+
+      function main() {
+        // update quiz meta data
+        document.title = quizTitle;
+        quizTitleElement.innerHTML = quizTitle;
+        quizDescriptionElement.innerHTML = quizDescription;
+
+        const passPercentElement = document.getElementById('pass-percent');
+        passPercentElement.innerHTML = passPercent + '%';
+        totalNumberOfQuestions = questionData.length;
+        // shuffle the questionData to randomize the order of the questions
+        for (let i = questionData.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [questionData[i], questionData[j]] = [questionData[j], questionData[i]];
+        }
+
+        let formattedQuestions = questionData.map(formatSingleQuestionData);
+        updateScore();
+        // display the formattedQuestions
+        formattedQuestions.forEach((question, idx) => {
+          renderSingleQuestion(question, idx + 1);
+        });
+      }
+
+      /**
+       * Formats the question data from the given QuizData object.
+       *
+       * @param {Object} singleQuizData - The singleQuizData object containing prompt and correct_response.
+       * @return {Object} The formatted question object with the following properties:
+       *   - id: The ID of the question.
+       *   - question: The text of the question.
+       *   - answers: The array of answer options.
+       *   - correctAnswer: The text of the correct answer.
+       *   - explanation: The explanation of the correct answer.
+       */
+      function formatSingleQuestionData(singleQuizData = null) {
+        const { prompt, correct_response, id } = singleQuizData;
+        const questionText = prompt.question;
+        const answers = prompt.answers;
+        const correctAnswer = correct_response[0];
+        const correctAnswerText = answers[correctAnswer.toLowerCase().charCodeAt(0) - 97];
+        const questionObj = {
+          id: id,
+          question: questionText,
+          answers: answers,
+          correctAnswer,
+          explanation: prompt?.explanation || '',
+        };
+        return questionObj;
+      }
+
+      /**
+       * Renders a single question with its options and submit button.
+       *
+       * @param {Object} singleQuestionData - The data of the question to render.
+       * @param {number} rootIndex - The index of the question in the quiz.
+       * @return {void} return nothing.
+       */
+
+      const renderSingleQuestion = (singleQuestionData = {}, rootIndex = 1) => {
+        const { id, explanation, answers, correctAnswer, question } = singleQuestionData;
+        // shuffle the answers to randomize the order of the answers
+        // for (let i = answers.length - 1; i > 0; i--) {
+        //   const j = Math.floor(Math.random() * (i + 1));
+        //   [answers[i], answers[j]] = [answers[j], answers[i]];
+        // }
+        const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+        const optionsHTML = answers
+          .map((option, index) => {
+            const optionId = `${id}_${index}`;
+
+            return `
+        <div class="question-lable">
+          <input type="radio" id="${optionId}" name="${'answer'}" value="${alphabet[index]}" />
+          <label for="${optionId}">${option}</label>
+        </div>
+      `;
+          })
+
+          .join('');
+
+        const container = document.createElement('div');
+        container.innerHTML = `
+        <form data-correct-answer="${correctAnswer}" data-question-id="${id}" class="single-question-container" onsubmit="submitButtonListener(event)">
+          <div style="display: flex;justify-content: space-between;">
+            <p style="font-weight: 600">Question ${rootIndex}:</p>
+            <button type="button" onclick="renderExplanation(event)" id="${`explanation-${id}`}" data-explanation="${'tt'}" data-explanation-id=${id} class="explanation-btn">View Explanation</button>
+          </div>
+          <p style="margin-bottom: 8px;line-height: 1.5">${question}</p>
+          <div class="options-container">
+            ${optionsHTML}
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button type="submit" id="submit-button" class="button">Submit</button>
+          </div>
+        </form>
+      `;
+        quizContainerElement.appendChild(container);
+      };
+
+      /**
+       * Updates the score on the page based on the number of correct and incorrect answers.
+       *
+       * @return {void} This function does not return a value.
+       */
+      function updateScore() {
+        const currentParcentageElement = document.getElementById('current-score');
+        const correctAnswerElement = document.getElementById('correct-answers');
+        const wrongAnswerElement = document.getElementById('wrong-answers');
+        correctAnswerElement.innerHTML = correct.size;
+        wrongAnswerElement.innerHTML = incorrect.size;
+        const score = Number((correct.size / totalNumberOfQuestions) * 100).toFixed(2);
+        currentParcentageElement.innerHTML = score;
+      }
+
+      /**
+       * Handles the event when the submit button is clicked.
+       *
+       * @param {Event} e - The event object.
+       * @return {void} This function does not return anything.
+       */
+      const submitButtonListener = e => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const form = e.target;
+        const selectedOption = e.target.querySelector('input[type="radio"]:checked');
+        if (!selectedOption) {
+          alert('Please select an answer!');
+          return;
+        }
+
+        let isCorrect = false;
+        const { answer: userAnswer } = Object.fromEntries(formData.entries());
+        const correctAnswer = e.target.dataset.correctAnswer;
+        const questionId = e.target.dataset.questionId;
+        if (userAnswer == correctAnswer) {
+          correct.add(questionId);
+          incorrect.delete(questionId);
+          isCorrect = true;
+        } else {
+          incorrect.add(e.target.dataset.questionId);
+          correct.delete(questionId);
+        }
+        updateScore();
+
+        const resultClass = isCorrect ? 'correct-answer' : 'incorrect-answer';
+
+        form.querySelectorAll('.question-lable').forEach(label => {
+          label.classList.remove('correct-answer', 'incorrect-answer');
+        });
+        selectedOption.closest('.question-lable').classList.add(resultClass);
+      };
+
+      function renderExplanation(ev) {
+        const dataid = ev.target.dataset.explanationId;
+        const quiz = quizData.questions.find(q => q.id === Number(dataid));
+        modalTextElement.innerHTML =
+          quiz && quiz.prompt.explanation ? quiz.prompt.explanation : 'no explanation found';
+        // modalTextElement.innerHTML = ev.target.dataset?.explanation || 'no explanation found';
+        dialog.showModal();
+        dialog.addEventListener('click', event => {
+          if (event.target === dialog) {
+            dialog.close();
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

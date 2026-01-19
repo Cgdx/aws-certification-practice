@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz</title>
+    <style>
+      * {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+          Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-size: 16px;
+      }
+
+      main {
+        padding-top: 48px;
+      }
+
+      :root {
+        --large-device-width: 850px;
+        --primary-color: #0f172a;
+        --secondary-color: #020617;
+        --primary-text-color: #c7d1dd;
+        --secondary-text-color: #061602;
+        --success-background: hsl(159, 82%, 24%);
+        --success-foreground: hsl(164, 86%, 16%);
+        --success: hsl(160, 84%, 39%);
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --info-background: hsl(218, 81%, 8%);
+        --info-foreground: hsl(217, 91%, 85%);
+        --border-color: #d1d7dc;
+        --check-box-size: 20px;
+        /* control the size */
+        --check-box-color: var(--info-foreground);
+        /* the active color */
+      }
+
+      body {
+        position: relative;
+        background-color: #020617;
+        color: var(--primary-text-color);
+      }
+
+      #score-stats-container {
+        position: fixed;
+        z-index: 10;
+        top: 0;
+        height: 40px;
+        width: 100%;
+        background-color: var(--info-background);
+
+        padding: 0px 16px;
+        color: var(--info-foreground);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      #quiz-container {
+        border-radius: 8px;
+        display: flex;
+        gap: 16px;
+        flex-direction: column;
+      }
+
+      input[type='radio'] {
+        height: var(--check-box-size);
+        aspect-ratio: 1;
+        border: calc(var(--check-box-size) / 8) solid #939393;
+        padding: calc(var(--check-box-size) / 8);
+        background: radial-gradient(farthest-side, var(--check-box-color) 94%, #0000) 50%/0 0 no-repeat
+          content-box;
+        border-radius: 50%;
+        outline-offset: calc(var(--check-box-size) / 10);
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        cursor: pointer;
+        font-size: inherit;
+        transition: 0.3s;
+      }
+
+      input[type='radio']:checked {
+        border-color: var(--check-box-color);
+        background-size: 100% 100%;
+      }
+
+      input[type='radio']:disabled {
+        background: linear-gradient(#939393 0 0) 50%/100% 20% no-repeat content-box;
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      label {
+        /* display: inline-flex; */
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        padding: 4px 6px;
+        border-radius: 4px;
+      }
+
+      @media (max-width: 767px) {
+        input[type='radio'],
+        label {
+          cursor: default;
+        }
+
+        #quiz-container {
+          margin-left: 8px;
+          margin-right: 8px;
+        }
+      }
+
+      /* PC (Desktop devices) */
+      @media (min-width: 768px) {
+        body {
+          display: flex;
+          justify-content: center;
+        }
+
+        main {
+          max-width: var(--large-device-width);
+        }
+
+        #score-stats-container {
+          max-width: var(--large-device-width);
+        }
+
+        dialog {
+          max-width: var(--large-device-width);
+        }
+      }
+
+      @media print {
+        input[type='radio'] {
+          background: none !important;
+          border-color: #939393 !important;
+        }
+
+        input[type='radio']:checked {
+          border-color: #939393 !important;
+        }
+      }
+
+      .question-lable {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      button {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        outline: none;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+      }
+
+      .button {
+        background-color: var(--success-background);
+        border: none;
+        color: #f4f5f7;
+        opacity: 0.8;
+        font-size: 18px;
+        flex-grow: 1;
+        padding: 8px 16px;
+        border-radius: 8px;
+      }
+
+      .button:hover {
+        opacity: 1;
+      }
+
+      .explanation-btn {
+        border: none;
+        color: var(--success);
+        background-color: transparent;
+      }
+
+      #submit-button:active::after {
+        background-color: #ef4444;
+      }
+
+      .single-question-container {
+        background-color: var(--primary-color);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 16px;
+        border-radius: 8px;
+      }
+
+      #modal-content {
+        padding: 16px;
+        line-height: 24px;
+      }
+
+      dialog::backdrop {
+        background: rgba(0, 0, 0, 0.5);
+      }
+
+      dialog {
+        position: fixed;
+        border: 1px solid var(--border-color);
+        background-color: var(--primary-color);
+        color: rgb(240, 241, 248);
+        padding: 16px;
+        border-radius: 8px;
+        width: 80vw;
+        max-height: 80vh;
+        overflow: auto;
+        top: 50%;
+        left: 50%;
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        -moz-transform: translateX(-50%) translateY(-50%);
+        -ms-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+      }
+
+      #close-modal-btn {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        padding: 2px 8px;
+        border-radius: 2px;
+        border: none;
+        background-color: var(--danger);
+      }
+
+      .correct-answer label {
+        border: 2px solid var(--success);
+        width: 100%;
+      }
+
+      .incorrect-answer label {
+        border: 2px solid var(--danger);
+        width: 100%;
+      }
+
+      .options-container {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      #quiz-meta-container {
+        border-radius: 8px;
+        background-color: var(--primary-color);
+        margin-bottom: 12px;
+        padding: 8px;
+      }
+
+      #quiz-title {
+        text-align: center;
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+
+      #quiz-description {
+        line-height: 1.5;
+        padding: 2px 6px;
+      }
+      img {
+        width: 100%;
+      }
+    </style>
+  </head>
+
+  <body onload="main()">
+    <main>
+      <section id="quiz-meta-container">
+        <h1 id="quiz-title"></h1>
+        <p id="quiz-description"></p>
+      </section>
+      <section id="score-stats-container">
+        <div id="score-card">
+          Score: <span id="current-score">999</span> of
+          <span id="pass-percent">999%</span>
+        </div>
+        <div>Correct: <span id="correct-answers">999</span></div>
+        <div>Incorrect: <span id="wrong-answers">999</span></div>
+      </section>
+
+      <section id="quiz-container"></section>
+
+      <dialog id="modal" class="modal-container">
+        <div id="modal-content">
+          <p id="modal-text"></p>
+        </div>
+      </dialog>
+    </main>
+
+    <script>
+      const quizData = {"quiz_id":5334526,"quiz_title":"High Availability & Scalability Quiz","questions":[{"_class":"assessment","id":37492506,"assessment_type":"multiple-choice","prompt":{"feedbacks":["",""],"answers":["<p>Horizontal Scalability</p>","<p>Vertical Scalability</p>"],"question":"<p>Scaling an EC2 instance from <code>r4.large</code> to <code>r4.4xlarge</code> is called .....................</p>","relatedLectureIds":""},"correct_response":["b"],"section":"","question_plain":"Scaling an EC2 instance from r4.large to r4.4xlarge is called .....................","related_lectures":[]},{"_class":"assessment","id":37492512,"assessment_type":"multiple-choice","prompt":{"feedbacks":["",""],"relatedLectureIds":"","question":"<p>Running an application on an Auto Scaling Group that scales the number of EC2 instances in and out is called .....................</p>","answers":["<p>Horizontal Scalability</p>","<p>Vertical Scalability</p>"]},"correct_response":["a"],"section":"","question_plain":"Running an application on an Auto Scaling Group that scales the number of EC2 instances in and out is called .....................","related_lectures":[]},{"_class":"assessment","id":37492518,"assessment_type":"multiple-choice","prompt":{"question":"<p>Elastic Load Balancers provide a .......................</p>","relatedLectureIds":"","feedbacks":["","Only Network Load Balancer provides both static DNS name and static IP. While, Application Load Balancer provides a static DNS name but it does NOT provide a static IP. The reason being that AWS wants your Elastic Load Balancer to be accessible using a static endpoint, even if the underlying infrastructure that AWS manages changes.",""],"answers":["<p>static IPv4 we can use in our application</p>","<p>static DNS name we can use in our application</p>","<p>static IPv6 we can use in our application</p>"]},"correct_response":["b"],"section":"","question_plain":"Elastic Load Balancers provide a .......................","related_lectures":[]},{"_class":"assessment","id":37492530,"assessment_type":"multiple-choice","prompt":{"relatedLectureIds":"","feedbacks":["","","ELB Sticky Session feature ensures traffic for the same client is always redirected to the same target (e.g., EC2 instance). This helps that the client does not lose his session data."],"question":"<p>You are running a website on 10 EC2 instances fronted by an Elastic Load Balancer. Your users are complaining about the fact that the website always asks them to re-authenticate when they are moving between website pages. You are puzzled because it's working just fine on your machine and in the Dev environment with 1 EC2 instance. What could be the reason?</p>","answers":["<p>Your website must have an issue when hosted on multiple EC2 instances</p>","<p>The EC2 instances log out users as they can't see their IP addresses, instead, they receive ELB IP addresses.</p>","<p>The Elastic Load Balancer does not have Sticky Sessions enabled</p>"]},"correct_response":["c"],"section":"","question_plain":"You are running a website on 10 EC2 instances fronted by an Elastic Load Balancer. Your users are complaining about the fact that the website always asks them to re-authenticate when they are moving between website pages. You are puzzled because it's working just fine on your machine and in the Dev environment with 1 EC2 instance. What could be the reason?","related_lectures":[]},{"_class":"assessment","id":37492542,"assessment_type":"multiple-choice","prompt":{"answers":["<p>Modify your website's frontend so that users send their IP in every request</p>","<p>Modify your website's backend to get the client IP address from the <strong>X-Forwarded-For</strong> header</p>","<p>Modify your website's backend to get the client IP address from the <strong>X-Forwarded-Port</strong> header</p>","<p>Modify your website's backend to get the client IP address from the <strong>X-Forwarded-Proto</strong> header</p>"],"relatedLectureIds":"","question":"<p>You are using an Application Load Balancer to distribute traffic to your website hosted on EC2 instances. It turns out that your website only sees traffic coming from private IPv4 addresses which are in fact your Application Load Balancer's IP addresses. What should you do to get the IP address of clients connected to your website?</p>","feedbacks":["","When using an Application Load Balancer to distribute traffic to your EC2 instances, the IP address you'll receive requests from will be the ALB's private IP addresses. To get the client's IP address, ALB adds an additional header called \"X-Forwarded-For\" contains the client's IP address.","\"X-Forwarded-Port\" used to get the client's requested port.","\"X-Forwarded-Proto\" used to get the client's requested protocol."]},"correct_response":["b"],"section":"","question_plain":"You are using an Application Load Balancer to distribute traffic to your website hosted on EC2 instances. It turns out that your website only sees traffic coming from private IPv4 addresses which are in fact your Application Load Balancer's IP addresses. What should you do to get the IP address of clients connected to your website?","related_lectures":[]},{"_class":"assessment","id":37492622,"assessment_type":"multiple-choice","prompt":{"relatedLectureIds":"","question":"<p>You hosted an application on a set of EC2 instances fronted by an Elastic Load Balancer. A week later, users begin complaining that sometimes the application just doesn't work. You investigate the issue and found that some EC2 instances crash from time to time. What should you do to protect users from connecting to the EC2 instances that are crashing?</p>","feedbacks":["When you enable ELB Health Checks, your ELB won't send traffic to unhealthy (crashed) EC2 instances.","","",""],"answers":["<p>Enable ELB Health Checks</p>","<p>Enable ELB Stickiness</p>","<p>Enable SSL Termination</p>","<p>Enable Cross-Zone Load Balancing</p>"]},"correct_response":["a"],"section":"","question_plain":"You hosted an application on a set of EC2 instances fronted by an Elastic Load Balancer. A week later, users begin complaining that sometimes the application just doesn't work. You investigate the issue and found that some EC2 instances crash from time to time. What should you do to protect users from connecting to the EC2 instances that are crashing?","related_lectures":[]},{"_class":"assessment","id":37511954,"assessment_type":"multiple-choice","prompt":{"relatedLectureIds":"","feedbacks":["","","Network Load Balancer provides the highest performance and lowest latency if your application needs it."],"answers":["<p>Application Load Balancer</p>","<p>Classic Load Balancer</p>","<p>Network Load Balancer</p>"],"question":"<p>You are working as a Solutions Architect for a company and you are required to design an architecture for a high-performance, low-latency application that will receive millions of requests per second. Which type of Elastic Load Balancer should you choose?</p>"},"correct_response":["c"],"section":"","question_plain":"You are working as a Solutions Architect for a company and you are required to design an architecture for a high-performance, low-latency application that will receive millions of requests per second. Which type of Elastic Load Balancer should you choose?","related_lectures":[]},{"_class":"assessment","id":37511958,"assessment_type":"multiple-choice","prompt":{"question":"<p>Application Load Balancers support the following protocols, <strong>EXCEPT</strong>:</p>","relatedLectureIds":"","feedbacks":["","","Application Load Balancers support HTTP, HTTPS and WebSocket",""],"answers":["<p>HTTP</p>","<p>HTTPS</p>","<p>TCP</p>","<p>WebSocket</p>"]},"correct_response":["c"],"section":"","question_plain":"Application Load Balancers support the following protocols, EXCEPT:","related_lectures":[]},{"_class":"assessment","id":37511962,"assessment_type":"multiple-choice","prompt":{"feedbacks":["ALBs can route traffic to different Target Groups based on URL Path, Hostname, HTTP Headers, and Query Strings.","","",""],"relatedLectureIds":"","question":"<p>Application Load Balancers can route traffic to different Target Groups based on the following, <strong>EXCEPT</strong>:</p>","answers":["<p>Client's Location (Geography)</p>","<p>Hostname</p>","<p>Request URL Path</p>","<p>Source IP Address</p>"]},"correct_response":["a"],"section":"","question_plain":"Application Load Balancers can route traffic to different Target Groups based on the following, EXCEPT:","related_lectures":[]},{"_class":"assessment","id":37511966,"assessment_type":"multiple-choice","prompt":{"answers":["<p>EC2 Instances</p>","<p>Network Load Balancer</p>","<p>Private IP Addresses</p>","<p>Lambda Functions</p>"],"feedbacks":["","","",""],"relatedLectureIds":"","question":"<p>Registered targets in a Target Groups for an Application Load Balancer can be one of the following, <strong>EXCEPT</strong>:</p>"},"correct_response":["b"],"section":"","question_plain":"Registered targets in a Target Groups for an Application Load Balancer can be one of the following, EXCEPT:","related_lectures":[]},{"_class":"assessment","id":37512418,"assessment_type":"multiple-choice","prompt":{"feedbacks":["You can't attach an Elastic IP address to Application Load Balancers.","Network Load Balancer has one static IP address per AZ and you can attach an Elastic IP address to it. Application Load Balancers and Classic Load Balancers have a static DNS name.",""],"answers":["<p>Application Load Balancer with an Elastic IP attached to it</p>","<p>Network Load Balancer</p>","<p>Classic Load Balancer</p>"],"question":"<p>For compliance purposes, you would like to expose a fixed static IP address to your end-users so that they can write firewall rules that will be stable and approved by regulators. What type of Elastic Load Balancer would you choose?</p>","relatedLectureIds":""},"correct_response":["b"],"section":"","question_plain":"For compliance purposes, you would like to expose a fixed static IP address to your end-users so that they can write firewall rules that will be stable and approved by regulators. What type of Elastic Load Balancer would you choose?","related_lectures":[]},{"_class":"assessment","id":37512420,"assessment_type":"multiple-choice","prompt":{"feedbacks":["","The following cookie names are reserved by the ELB (AWSALB, AWSALBAPP, AWSALBTG).","",""],"question":"<p>You want to create a custom application-based cookie in your Application Load Balancer. Which of the following you can use as a cookie name?</p>","answers":["<p>AWSALBAPP</p>","<p>APPUSERC</p>","<p>AWSALBTG</p>","<p>AWSALB</p>"],"relatedLectureIds":""},"correct_response":["b"],"section":"","question_plain":"You want to create a custom application-based cookie in your Application Load Balancer. Which of the following you can use as a cookie name?","related_lectures":[]},{"_class":"assessment","id":37512428,"assessment_type":"multiple-choice","prompt":{"question":"<p>You have a Network Load Balancer that distributes traffic across a set of EC2 instances in <code>us-east-1</code>. You have 2 EC2 instances in <code>us-east-1b</code> AZ and 5 EC2 instances in <code>us-east-1e</code> AZ. You have noticed that the CPU utilization is higher in the EC2 instances in <code>us-east-1b</code> AZ. After more investigation, you noticed that the traffic is&nbsp;equally distributed across the two AZs. How would you solve this problem?</p>","relatedLectureIds":"","feedbacks":["When Cross-Zone Load Balancing is enabled, ELB distributes traffic evenly across all registered EC2 instances in all AZs.","","",""],"answers":["<p>Enable Cross-Zone Load Balancing</p>","<p>Enable Sticky Sessions</p>","<p>Enable ELB Health Checks</p>","<p>Enable SSL Termination</p>"]},"correct_response":["a"],"section":"","question_plain":"You have a Network Load Balancer that distributes traffic across a set of EC2 instances in us-east-1. You have 2 EC2 instances in us-east-1b AZ and 5 EC2 instances in us-east-1e AZ. You have noticed that the CPU utilization is higher in the EC2 instances in us-east-1b AZ. After more investigation, you noticed that the traffic is&nbsp;equally distributed across the two AZs. How would you solve this problem?","related_lectures":[]},{"_class":"assessment","id":37512430,"assessment_type":"multiple-choice","prompt":{"question":"<p>Which feature in both Application Load Balancers and Network Load Balancers allows you to load multiple SSL certificates on one listener?</p>","feedbacks":["","","",""],"relatedLectureIds":"","answers":["<p>TLS Termination</p>","<p>Server Name Indication (SNI)</p>","<p>SSL Security Policies</p>","<p>Host Headers</p>"]},"correct_response":["b"],"section":"","question_plain":"Which feature in both Application Load Balancers and Network Load Balancers allows you to load multiple SSL certificates on one listener?","related_lectures":[]},{"_class":"assessment","id":37512432,"assessment_type":"multiple-choice","prompt":{"answers":["<p>Use an HTTP to HTTPS redirect rule</p>","<p>Use a security group SSL certificate</p>","<p>Use Server Name Indication (SNI)</p>"],"feedbacks":["","","Server Name Indication (SNI) allows you to expose multiple HTTPS applications each with its own SSL certificate on the same listener. Read more here: https://aws.amazon.com/blogs/aws/new-application-load-balancer-sni/"],"relatedLectureIds":"","question":"<p>You have an Application Load Balancer that is configured to redirect traffic to 3 Target Groups based on the following hostnames: <strong>users.example.com</strong>, <strong>api.external.example.com</strong>, and <strong>checkout.example.com</strong>. You would like to configure HTTPS for each of these hostnames. How do you configure the ALB to make this work?</p>"},"correct_response":["c"],"section":"","question_plain":"You have an Application Load Balancer that is configured to redirect traffic to 3 Target Groups based on the following hostnames: users.example.com, api.external.example.com, and checkout.example.com. You would like to configure HTTPS for each of these hostnames. How do you configure the ALB to make this work?","related_lectures":[]},{"_class":"assessment","id":37512434,"assessment_type":"multiple-choice","prompt":{"question":"<p>You have an application hosted on a set of EC2 instances managed by an Auto Scaling Group that you configured both desired and maximum capacity to 3. Also, you have created a CloudWatch Alarm that is configured to scale out your ASG when CPU Utilization reaches 60%. Your application suddenly received huge traffic and is now running at 80% CPU Utilization. What will happen?</p>","feedbacks":["The Auto Scaling Group can't go over the maximum capacity (you configured) during scale-out events.","",""],"relatedLectureIds":"","answers":["<p>Nothing</p>","<p>The desired capacity will go up to 4 and the maximum capacity will stay at 3</p>","<p>The desired capacity will go up to 4 and the maximum capacity will stay at 4</p>"]},"correct_response":["a"],"section":"","question_plain":"You have an application hosted on a set of EC2 instances managed by an Auto Scaling Group that you configured both desired and maximum capacity to 3. Also, you have created a CloudWatch Alarm that is configured to scale out your ASG when CPU Utilization reaches 60%. Your application suddenly received huge traffic and is now running at 80% CPU Utilization. What will happen?","related_lectures":[]},{"_class":"assessment","id":37512438,"assessment_type":"multiple-choice","prompt":{"question":"<p>You have an Auto Scaling Group fronted by an Application Load Balancer. You have configured the ASG to use ALB Health Checks, then one EC2 instance has just been reported unhealthy. What will happen to the EC2 instance?</p>","feedbacks":["","","You can configure the Auto Scaling Group to determine the EC2 instances' health based on Application Load Balancer Health Checks instead of EC2 Status Checks (default). When an EC2 instance fails the ALB Health Checks, it is marked unhealthy and will be terminated while the ASG launches a new EC2 instance."],"answers":["<p>The ASG will keep the instance running and re-start the application</p>","<p>The ASG will detach the EC2 instance and leave it running</p>","<p>The ASG will terminate the EC2 instance</p>"],"relatedLectureIds":""},"correct_response":["c"],"section":"","question_plain":"You have an Auto Scaling Group fronted by an Application Load Balancer. You have configured the ASG to use ALB Health Checks, then one EC2 instance has just been reported unhealthy. What will happen to the EC2 instance?","related_lectures":[]},{"_class":"assessment","id":37512440,"assessment_type":"multiple-choice","prompt":{"feedbacks":["There's no CloudWatch Metric for \"requests per minute\" for backend-to-database connections. You need to create a CloudWatch Custom Metric, then create a CloudWatch Alarm.","",""],"question":"<p>Your boss asked you to scale your Auto Scaling Group based on the <strong>number of requests per minute</strong> your application makes to your database. What should you do?</p>","answers":["<p>Create a CloudWatch custom metric then create a CloudWatch Alarm on this metric to scale your ASG</p>","<p>You politely tell him it's impossible</p>","<p>Enable Detailed Monitoring then create a CloudWatch Alarm to scale your ASG</p>"],"relatedLectureIds":""},"correct_response":["a"],"section":"","question_plain":"Your boss asked you to scale your Auto Scaling Group based on the number of requests per minute your application makes to your database. What should you do?","related_lectures":[]},{"_class":"assessment","id":37512478,"assessment_type":"multiple-choice","prompt":{"question":"<p>An application is deployed with an Application Load Balancer and an Auto Scaling Group. Currently, you manually scale the ASG and you would like to define a Scaling Policy that will ensure the average number of connections to your EC2 instances is around 1000. Which Scaling Policy should you use?</p>","answers":["<p>Simple Scaling Policy</p>","<p>Step Scaling Policy</p>","<p>Target Tracking Policy</p>","<p>Scheduled Scaling Policy</p>"],"relatedLectureIds":"","feedbacks":["","","",""]},"correct_response":["c"],"section":"","question_plain":"An application is deployed with an Application Load Balancer and an Auto Scaling Group. Currently, you manually scale the ASG and you would like to define a Scaling Policy that will ensure the average number of connections to your EC2 instances is around 1000. Which Scaling Policy should you use?","related_lectures":[]},{"_class":"assessment","id":51042542,"assessment_type":"multiple-choice","prompt":{"question":"<p>You have an ASG and a Network Load Balancer. The application on your ASG&nbsp;supports the HTTP protocol and is integrated with the Load Balancer health checks. You are currently using the TCP&nbsp;health checks. You would like to migrate to using HTTP&nbsp;health checks, what do you do?</p>","relatedLectureIds":["18078013"],"feedbacks":["this would work, but is not necessary","the NLB supports HTTP health checks as well as TCP and HTTPS"],"answers":["<p>Migrate to an Application Load Balancer</p>","<p>Migrate the health check to HTTP</p>"]},"correct_response":["b"],"section":"","question_plain":"You have an ASG and a Network Load Balancer. The application on your ASG&nbsp;supports the HTTP protocol and is integrated with the Load Balancer health checks. You are currently using the TCP&nbsp;health checks. You would like to migrate to using HTTP&nbsp;health checks, what do you do?","related_lectures":[{"_class":"lecture","id":18078013,"title":"Network Load Balancer (NLB)","created":"2020-02-16T18:32:04Z","is_published":true,"asset":{"_class":"asset","id":67390797,"asset_type":"Video","title":"SAA - ELB - Network Load Balancer v6.mp4","created":"2025-08-13T13:52:05Z"},"object_index":76,"url":"/course/aws-certified-solutions-architect-associate-saa-c03/learn/lecture/18078013"}]},{"_class":"assessment","id":51457322,"assessment_type":"multiple-choice","prompt":{"question":"<p>You have a website hosted in EC2 instances in an Auto Scaling Group fronted by an Application Load Balancer. Currently, the website is served over HTTP, and you have been tasked to configure it to use HTTPS. You have created a certificate in ACM and attached it to the Application Load Balancer. What you can do to force users to access the website using HTTPS instead of HTTP?</p>","relatedLectureIds":"","feedbacks":["","",""],"answers":["<p>Send an email to all customers to use HTTPS instead of HTTP</p>","<p>Configure the Application Load Balancer to redirect HTTP to HTTPS</p>","<p>Configure the DNS record to redirect HTTP to HTTPS</p>"]},"correct_response":["b"],"section":"","question_plain":"You have a website hosted in EC2 instances in an Auto Scaling Group fronted by an Application Load Balancer. Currently, the website is served over HTTP, and you have been tasked to configure it to use HTTPS. You have created a certificate in ACM and attached it to the Application Load Balancer. What you can do to force users to access the website using HTTPS instead of HTTP?","related_lectures":[]}]};
+      let correct = new Set();
+      let incorrect = new Set();
+      let totalNumberOfQuestions = 0;
+      const quizTitle = quizData.quiz_title;
+      const quizDescription = quizData.quiz_description;
+      const questionData = quizData.questions;
+      const passPercent = quizData.pass_percent;
+      const modalTextElement = document.getElementById('modal-text');
+      const quizContainerElement = document.getElementById('quiz-container');
+
+      const dialog = document.querySelector('dialog');
+      const showButton = document.getElementById('view-explanatin');
+      const closeButton = document.getElementById('close-modal-btn');
+      const quizTitleElement = document.getElementById('quiz-title');
+      const quizDescriptionElement = document.getElementById('quiz-description');
+
+      function main() {
+        // update quiz meta data
+        document.title = quizTitle;
+        quizTitleElement.innerHTML = quizTitle;
+        quizDescriptionElement.innerHTML = quizDescription;
+
+        const passPercentElement = document.getElementById('pass-percent');
+        passPercentElement.innerHTML = passPercent + '%';
+        totalNumberOfQuestions = questionData.length;
+        // shuffle the questionData to randomize the order of the questions
+        for (let i = questionData.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [questionData[i], questionData[j]] = [questionData[j], questionData[i]];
+        }
+
+        let formattedQuestions = questionData.map(formatSingleQuestionData);
+        updateScore();
+        // display the formattedQuestions
+        formattedQuestions.forEach((question, idx) => {
+          renderSingleQuestion(question, idx + 1);
+        });
+      }
+
+      /**
+       * Formats the question data from the given QuizData object.
+       *
+       * @param {Object} singleQuizData - The singleQuizData object containing prompt and correct_response.
+       * @return {Object} The formatted question object with the following properties:
+       *   - id: The ID of the question.
+       *   - question: The text of the question.
+       *   - answers: The array of answer options.
+       *   - correctAnswer: The text of the correct answer.
+       *   - explanation: The explanation of the correct answer.
+       */
+      function formatSingleQuestionData(singleQuizData = null) {
+        const { prompt, correct_response, id } = singleQuizData;
+        const questionText = prompt.question;
+        const answers = prompt.answers;
+        const correctAnswer = correct_response[0];
+        const correctAnswerText = answers[correctAnswer.toLowerCase().charCodeAt(0) - 97];
+        const questionObj = {
+          id: id,
+          question: questionText,
+          answers: answers,
+          correctAnswer,
+          explanation: prompt?.explanation || '',
+        };
+        return questionObj;
+      }
+
+      /**
+       * Renders a single question with its options and submit button.
+       *
+       * @param {Object} singleQuestionData - The data of the question to render.
+       * @param {number} rootIndex - The index of the question in the quiz.
+       * @return {void} return nothing.
+       */
+
+      const renderSingleQuestion = (singleQuestionData = {}, rootIndex = 1) => {
+        const { id, explanation, answers, correctAnswer, question } = singleQuestionData;
+        // shuffle the answers to randomize the order of the answers
+        // for (let i = answers.length - 1; i > 0; i--) {
+        //   const j = Math.floor(Math.random() * (i + 1));
+        //   [answers[i], answers[j]] = [answers[j], answers[i]];
+        // }
+        const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+        const optionsHTML = answers
+          .map((option, index) => {
+            const optionId = `${id}_${index}`;
+
+            return `
+        <div class="question-lable">
+          <input type="radio" id="${optionId}" name="${'answer'}" value="${alphabet[index]}" />
+          <label for="${optionId}">${option}</label>
+        </div>
+      `;
+          })
+
+          .join('');
+
+        const container = document.createElement('div');
+        container.innerHTML = `
+        <form data-correct-answer="${correctAnswer}" data-question-id="${id}" class="single-question-container" onsubmit="submitButtonListener(event)">
+          <div style="display: flex;justify-content: space-between;">
+            <p style="font-weight: 600">Question ${rootIndex}:</p>
+            <button type="button" onclick="renderExplanation(event)" id="${`explanation-${id}`}" data-explanation="${'tt'}" data-explanation-id=${id} class="explanation-btn">View Explanation</button>
+          </div>
+          <p style="margin-bottom: 8px;line-height: 1.5">${question}</p>
+          <div class="options-container">
+            ${optionsHTML}
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button type="submit" id="submit-button" class="button">Submit</button>
+          </div>
+        </form>
+      `;
+        quizContainerElement.appendChild(container);
+      };
+
+      /**
+       * Updates the score on the page based on the number of correct and incorrect answers.
+       *
+       * @return {void} This function does not return a value.
+       */
+      function updateScore() {
+        const currentParcentageElement = document.getElementById('current-score');
+        const correctAnswerElement = document.getElementById('correct-answers');
+        const wrongAnswerElement = document.getElementById('wrong-answers');
+        correctAnswerElement.innerHTML = correct.size;
+        wrongAnswerElement.innerHTML = incorrect.size;
+        const score = Number((correct.size / totalNumberOfQuestions) * 100).toFixed(2);
+        currentParcentageElement.innerHTML = score;
+      }
+
+      /**
+       * Handles the event when the submit button is clicked.
+       *
+       * @param {Event} e - The event object.
+       * @return {void} This function does not return anything.
+       */
+      const submitButtonListener = e => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const form = e.target;
+        const selectedOption = e.target.querySelector('input[type="radio"]:checked');
+        if (!selectedOption) {
+          alert('Please select an answer!');
+          return;
+        }
+
+        let isCorrect = false;
+        const { answer: userAnswer } = Object.fromEntries(formData.entries());
+        const correctAnswer = e.target.dataset.correctAnswer;
+        const questionId = e.target.dataset.questionId;
+        if (userAnswer == correctAnswer) {
+          correct.add(questionId);
+          incorrect.delete(questionId);
+          isCorrect = true;
+        } else {
+          incorrect.add(e.target.dataset.questionId);
+          correct.delete(questionId);
+        }
+        updateScore();
+
+        const resultClass = isCorrect ? 'correct-answer' : 'incorrect-answer';
+
+        form.querySelectorAll('.question-lable').forEach(label => {
+          label.classList.remove('correct-answer', 'incorrect-answer');
+        });
+        selectedOption.closest('.question-lable').classList.add(resultClass);
+      };
+
+      function renderExplanation(ev) {
+        const dataid = ev.target.dataset.explanationId;
+        const quiz = quizData.questions.find(q => q.id === Number(dataid));
+        modalTextElement.innerHTML =
+          quiz && quiz.prompt.explanation ? quiz.prompt.explanation : 'no explanation found';
+        // modalTextElement.innerHTML = ev.target.dataset?.explanation || 'no explanation found';
+        dialog.showModal();
+        dialog.addEventListener('click', event => {
+          if (event.target === dialog) {
+            dialog.close();
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

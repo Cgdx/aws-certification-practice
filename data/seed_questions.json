@@ -1,0 +1,654 @@
+{
+  "questions": [
+    {
+      "exam_type": "SAA-C03",
+      "domain": "1",
+      "difficulty": 1,
+      "question_text": "Which AWS service provides managed encryption keys for encrypting data at rest?",
+      "options": ["A. AWS Shield", "B. AWS WAF", "C. AWS KMS", "D. AWS IAM"],
+      "correct_answer": "C",
+      "explanation": "AWS Key Management Service (KMS) is a managed service that makes it easy for you to create and control the cryptographic keys used to encrypt your data. KMS integrates with most AWS services to encrypt data at rest.",
+      "reference": "https://docs.aws.amazon.com/kms/latest/developerguide/overview.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "1",
+      "difficulty": 1,
+      "question_text": "What is the primary purpose of AWS IAM?",
+      "options": ["A. Monitor application performance", "B. Manage access to AWS services and resources", "C. Store data in the cloud", "D. Deploy applications automatically"],
+      "correct_answer": "B",
+      "explanation": "AWS Identity and Access Management (IAM) is a web service that helps you securely control access to AWS resources. You use IAM to control who is authenticated and authorized to use resources.",
+      "reference": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "1",
+      "difficulty": 1,
+      "question_text": "Which feature allows you to require MFA for API calls made using IAM user credentials?",
+      "options": ["A. IAM Roles", "B. IAM Policies with MFA condition", "C. AWS Organizations", "D. Security Groups"],
+      "correct_answer": "B",
+      "explanation": "You can add MFA protection to API calls by adding conditions to IAM policies. The condition checks whether the user authenticated with an MFA device.",
+      "reference": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_configure-api-require.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "1",
+      "difficulty": 1,
+      "question_text": "What is the recommended way for an EC2 instance to access other AWS services securely?",
+      "options": ["A. Store access keys in the application code", "B. Use IAM roles attached to the EC2 instance", "C. Store credentials in environment variables", "D. Use root account credentials"],
+      "correct_answer": "B",
+      "explanation": "IAM roles for EC2 provide temporary credentials that are automatically rotated. This is more secure than storing long-term access keys on the instance.",
+      "reference": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "1",
+      "difficulty": 2,
+      "question_text": "A company needs to ensure that all S3 objects are encrypted at rest using keys managed by the customer. Which encryption option should they use?",
+      "options": ["A. SSE-S3", "B. SSE-KMS with AWS managed key", "C. SSE-KMS with customer managed key (CMK)", "D. Client-side encryption only"],
+      "correct_answer": "C",
+      "explanation": "SSE-KMS with a customer managed key (CMK) allows customers to create, manage, and audit the encryption keys used to encrypt S3 objects, providing full control over key management.",
+      "reference": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingKMSEncryption.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "1",
+      "difficulty": 2,
+      "question_text": "Which AWS service should be used to centrally manage security policies across multiple AWS accounts?",
+      "options": ["A. AWS Config", "B. AWS Organizations with SCPs", "C. AWS IAM", "D. Amazon Inspector"],
+      "correct_answer": "B",
+      "explanation": "AWS Organizations with Service Control Policies (SCPs) allows you to centrally manage and enforce security policies across multiple AWS accounts in your organization.",
+      "reference": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "1",
+      "difficulty": 2,
+      "question_text": "A company wants to restrict S3 bucket access to only requests coming from their VPC. What should they configure?",
+      "options": ["A. S3 ACLs", "B. IAM policies", "C. S3 bucket policy with VPC endpoint condition", "D. Security groups"],
+      "correct_answer": "C",
+      "explanation": "You can use an S3 bucket policy with a condition that restricts access to requests from a specific VPC or VPC endpoint using the aws:sourceVpce or aws:sourceVpc condition keys.",
+      "reference": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/example-bucket-policies-vpc-endpoint.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "1",
+      "difficulty": 2,
+      "question_text": "Which service provides automated security assessment to help improve the security and compliance of applications deployed on AWS?",
+      "options": ["A. AWS Trusted Advisor", "B. Amazon Inspector", "C. AWS Config", "D. Amazon GuardDuty"],
+      "correct_answer": "B",
+      "explanation": "Amazon Inspector is an automated security assessment service that helps improve the security and compliance of applications deployed on AWS by automatically assessing applications for vulnerabilities.",
+      "reference": "https://docs.aws.amazon.com/inspector/latest/user/what-is-inspector.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "1",
+      "difficulty": 3,
+      "question_text": "A company has a requirement to encrypt data before storing it in S3 and maintain complete control over the encryption process. The encryption must happen on the client side. Which approach should they use?",
+      "options": ["A. SSE-S3", "B. SSE-KMS", "C. Client-side encryption with AWS KMS managed keys", "D. SSE-C"],
+      "correct_answer": "C",
+      "explanation": "Client-side encryption with AWS KMS managed keys allows the client to encrypt data before uploading to S3, maintaining complete control over the encryption process while leveraging KMS for key management.",
+      "reference": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingClientSideEncryption.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "1",
+      "difficulty": 3,
+      "question_text": "A company needs to implement a solution that prevents accidental deletion of S3 objects and allows recovery of deleted objects for 90 days. Which combination of features should be enabled?",
+      "options": ["A. S3 versioning and lifecycle policies", "B. S3 versioning and MFA Delete", "C. S3 Object Lock and versioning", "D. Cross-region replication and versioning"],
+      "correct_answer": "B",
+      "explanation": "S3 versioning allows recovery of deleted objects by keeping previous versions. MFA Delete requires additional authentication to permanently delete object versions, preventing accidental deletion.",
+      "reference": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "1",
+      "difficulty": 3,
+      "question_text": "A security team needs to detect and respond to potentially unauthorized or malicious activity in their AWS accounts. Which service should they use?",
+      "options": ["A. AWS Config", "B. Amazon Inspector", "C. Amazon GuardDuty", "D. AWS Security Hub"],
+      "correct_answer": "C",
+      "explanation": "Amazon GuardDuty is a threat detection service that continuously monitors for malicious activity and unauthorized behavior. It uses machine learning, anomaly detection, and integrated threat intelligence.",
+      "reference": "https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "1",
+      "difficulty": 3,
+      "question_text": "An application requires database credentials that must be rotated automatically every 30 days. Which AWS service should be used to manage these credentials?",
+      "options": ["A. AWS Systems Manager Parameter Store", "B. AWS Secrets Manager", "C. AWS KMS", "D. AWS IAM"],
+      "correct_answer": "B",
+      "explanation": "AWS Secrets Manager enables automatic rotation of secrets, including database credentials. It can automatically rotate credentials for supported databases without requiring application changes.",
+      "reference": "https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "2",
+      "difficulty": 1,
+      "question_text": "Which AWS service provides a managed relational database with automatic failover to a standby replica?",
+      "options": ["A. Amazon DynamoDB", "B. Amazon RDS Multi-AZ", "C. Amazon ElastiCache", "D. Amazon Redshift"],
+      "correct_answer": "B",
+      "explanation": "Amazon RDS Multi-AZ deployments provide enhanced availability by automatically replicating data to a standby instance in a different Availability Zone and automatically failing over in case of an infrastructure failure.",
+      "reference": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "2",
+      "difficulty": 1,
+      "question_text": "What is the primary benefit of deploying resources across multiple Availability Zones?",
+      "options": ["A. Lower costs", "B. Higher performance", "C. High availability and fault tolerance", "D. Easier management"],
+      "correct_answer": "C",
+      "explanation": "Deploying resources across multiple Availability Zones provides high availability and fault tolerance because if one AZ experiences an outage, the application can continue operating from another AZ.",
+      "reference": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "2",
+      "difficulty": 1,
+      "question_text": "Which service distributes incoming application traffic across multiple targets?",
+      "options": ["A. Amazon Route 53", "B. Elastic Load Balancing", "C. AWS Auto Scaling", "D. Amazon CloudFront"],
+      "correct_answer": "B",
+      "explanation": "Elastic Load Balancing automatically distributes incoming application traffic across multiple targets, such as EC2 instances, containers, and IP addresses, in one or more Availability Zones.",
+      "reference": "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "2",
+      "difficulty": 1,
+      "question_text": "Which S3 storage class provides the highest durability?",
+      "options": ["A. S3 Standard", "B. S3 One Zone-IA", "C. S3 Glacier", "D. All S3 storage classes provide 99.999999999% durability"],
+      "correct_answer": "D",
+      "explanation": "All Amazon S3 storage classes are designed to provide 99.999999999% (11 nines) durability of objects over a given year, except S3 One Zone-IA which stores data in a single AZ.",
+      "reference": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "2",
+      "difficulty": 2,
+      "question_text": "A company needs to deploy a highly available web application that can automatically scale based on demand. Which services should they use?",
+      "options": ["A. EC2 instances with Elastic IP", "B. Auto Scaling group with Application Load Balancer", "C. Single EC2 instance with Reserved capacity", "D. AWS Lambda only"],
+      "correct_answer": "B",
+      "explanation": "An Auto Scaling group with an Application Load Balancer provides both high availability (multiple instances across AZs) and automatic scaling based on demand.",
+      "reference": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/autoscaling-load-balancer.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "2",
+      "difficulty": 2,
+      "question_text": "Which database service provides automatic replication across three Availability Zones with up to 15 read replicas?",
+      "options": ["A. Amazon RDS MySQL", "B. Amazon Aurora", "C. Amazon DynamoDB", "D. Amazon DocumentDB"],
+      "correct_answer": "B",
+      "explanation": "Amazon Aurora automatically replicates data across three Availability Zones and supports up to 15 low-latency read replicas, providing high availability and read scalability.",
+      "reference": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "2",
+      "difficulty": 2,
+      "question_text": "A company needs to implement a disaster recovery solution with an RPO of 1 hour and RTO of 4 hours. Which DR strategy is most appropriate?",
+      "options": ["A. Backup and Restore", "B. Pilot Light", "C. Warm Standby", "D. Multi-Site Active/Active"],
+      "correct_answer": "B",
+      "explanation": "Pilot Light strategy maintains a minimal version of the environment always running in the DR region. It can achieve RPO of hours and RTO of tens of minutes to hours, suitable for the given requirements.",
+      "reference": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "2",
+      "difficulty": 2,
+      "question_text": "Which feature should be enabled to ensure S3 objects are replicated to another region for disaster recovery?",
+      "options": ["A. S3 versioning", "B. S3 Transfer Acceleration", "C. S3 Cross-Region Replication", "D. S3 Lifecycle policies"],
+      "correct_answer": "C",
+      "explanation": "S3 Cross-Region Replication (CRR) automatically replicates objects across S3 buckets in different AWS Regions, providing disaster recovery capabilities.",
+      "reference": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "2",
+      "difficulty": 3,
+      "question_text": "A company runs a critical application that requires near-zero RPO and RTO. The application uses a relational database. Which architecture should they implement?",
+      "options": ["A. RDS Multi-AZ with automated backups", "B. Aurora Global Database with read replicas", "C. DynamoDB Global Tables", "D. RDS with Cross-Region Read Replicas"],
+      "correct_answer": "B",
+      "explanation": "Aurora Global Database provides near-zero RPO through physical replication across regions with typical latency under 1 second, and RTO of less than 1 minute through fast failover to a secondary region.",
+      "reference": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-global-database.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "2",
+      "difficulty": 3,
+      "question_text": "A stateful application running on EC2 needs to maintain session data during scaling events. Which solution provides the best resilience?",
+      "options": ["A. Store sessions on the EC2 instance EBS volume", "B. Use sticky sessions on the load balancer", "C. Store sessions in Amazon ElastiCache for Redis", "D. Store sessions in instance metadata"],
+      "correct_answer": "C",
+      "explanation": "Storing sessions in ElastiCache for Redis provides a centralized, highly available session store that persists across scaling events and instance failures, unlike EBS volumes or sticky sessions.",
+      "reference": "https://docs.aws.amazon.com/elasticache/latest/red-ug/elasticache-use-cases.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "2",
+      "difficulty": 3,
+      "question_text": "An application needs to process messages exactly once, even if the processing system fails and restarts. Which SQS feature should be used?",
+      "options": ["A. Standard Queue with visibility timeout", "B. FIFO Queue with deduplication", "C. Standard Queue with dead-letter queue", "D. FIFO Queue with message groups"],
+      "correct_answer": "B",
+      "explanation": "SQS FIFO queues with deduplication provide exactly-once processing semantics by automatically filtering duplicate messages within a 5-minute deduplication interval.",
+      "reference": "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues-exactly-once-processing.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "2",
+      "difficulty": 3,
+      "question_text": "A company needs to implement a solution that allows an application to continue operating during an AWS region outage. Which combination of services should they use?",
+      "options": ["A. Multi-AZ deployment with ALB", "B. Route 53 health checks with failover routing to a DR region", "C. CloudFront with multiple origins in the same region", "D. Global Accelerator with endpoints in the same region"],
+      "correct_answer": "B",
+      "explanation": "Route 53 health checks with failover routing can detect when the primary region is unhealthy and automatically route traffic to a DR region, providing resilience against regional outages.",
+      "reference": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "3",
+      "difficulty": 1,
+      "question_text": "Which service should be used to cache frequently accessed data to reduce database load?",
+      "options": ["A. Amazon RDS", "B. Amazon ElastiCache", "C. Amazon S3", "D. Amazon EFS"],
+      "correct_answer": "B",
+      "explanation": "Amazon ElastiCache is an in-memory caching service that can significantly reduce database load by caching frequently accessed data, improving application response times.",
+      "reference": "https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/WhatIs.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "3",
+      "difficulty": 1,
+      "question_text": "Which service provides a global content delivery network to reduce latency for users worldwide?",
+      "options": ["A. AWS Global Accelerator", "B. Amazon CloudFront", "C. Amazon Route 53", "D. Elastic Load Balancing"],
+      "correct_answer": "B",
+      "explanation": "Amazon CloudFront is a content delivery network (CDN) that caches content at edge locations worldwide, reducing latency for end users by serving content from locations closer to them.",
+      "reference": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "3",
+      "difficulty": 1,
+      "question_text": "What is the maximum size of an item in Amazon DynamoDB?",
+      "options": ["A. 1 KB", "B. 64 KB", "C. 400 KB", "D. 1 MB"],
+      "correct_answer": "C",
+      "explanation": "The maximum item size in DynamoDB is 400 KB, including both attribute names and values. This limit ensures consistent performance for database operations.",
+      "reference": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/ServiceQuotas.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "3",
+      "difficulty": 1,
+      "question_text": "Which EC2 instance type is optimized for compute-intensive workloads?",
+      "options": ["A. R5 instances", "B. C5 instances", "C. M5 instances", "D. T3 instances"],
+      "correct_answer": "B",
+      "explanation": "C5 instances are compute-optimized instances ideal for compute-intensive workloads such as batch processing, gaming servers, and scientific modeling.",
+      "reference": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/compute-optimized-instances.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "3",
+      "difficulty": 2,
+      "question_text": "An application needs to process millions of requests per second with single-digit millisecond latency. Which database service should be used?",
+      "options": ["A. Amazon RDS", "B. Amazon DynamoDB with DAX", "C. Amazon Redshift", "D. Amazon Aurora"],
+      "correct_answer": "B",
+      "explanation": "DynamoDB with DAX (DynamoDB Accelerator) provides in-memory caching that delivers microsecond response times for read-heavy workloads, supporting millions of requests per second.",
+      "reference": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "3",
+      "difficulty": 2,
+      "question_text": "A company needs to transfer 100TB of data to AWS with the fastest possible transfer time. Network bandwidth is limited. What should they use?",
+      "options": ["A. AWS Direct Connect", "B. S3 Transfer Acceleration", "C. AWS Snowball Edge", "D. VPN connection"],
+      "correct_answer": "C",
+      "explanation": "AWS Snowball Edge is ideal for transferring large amounts of data when network bandwidth is limited. It provides a physical device for offline data transfer.",
+      "reference": "https://docs.aws.amazon.com/snowball/latest/developer-guide/whatisedge.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "3",
+      "difficulty": 2,
+      "question_text": "Which EBS volume type provides the highest IOPS performance for I/O-intensive workloads?",
+      "options": ["A. gp3", "B. io2 Block Express", "C. st1", "D. sc1"],
+      "correct_answer": "B",
+      "explanation": "io2 Block Express volumes can deliver up to 256,000 IOPS and 4,000 MB/s throughput, providing the highest performance for I/O-intensive workloads like large databases.",
+      "reference": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "3",
+      "difficulty": 2,
+      "question_text": "An application running on EC2 needs to access S3 with the lowest possible latency. Which feature should be used?",
+      "options": ["A. S3 Transfer Acceleration", "B. VPC Gateway Endpoint for S3", "C. CloudFront distribution", "D. AWS Direct Connect"],
+      "correct_answer": "B",
+      "explanation": "A VPC Gateway Endpoint for S3 provides a private connection between your VPC and S3 without going through the internet, reducing latency and keeping traffic within the AWS network.",
+      "reference": "https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "3",
+      "difficulty": 3,
+      "question_text": "A company needs to run a high-performance computing (HPC) workload that requires low-latency networking between instances. Which feature should they use?",
+      "options": ["A. Placement groups - Spread", "B. Placement groups - Cluster", "C. Enhanced networking", "D. Multiple Elastic Network Interfaces"],
+      "correct_answer": "B",
+      "explanation": "Cluster placement groups pack instances close together inside an Availability Zone, providing low-latency networking ideal for HPC workloads that require tight coupling between nodes.",
+      "reference": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/placement-groups.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "3",
+      "difficulty": 3,
+      "question_text": "A data analytics application needs to query petabytes of data in S3 using standard SQL. Which service provides the best performance without managing infrastructure?",
+      "options": ["A. Amazon EMR", "B. Amazon Athena", "C. Amazon Redshift", "D. AWS Glue"],
+      "correct_answer": "B",
+      "explanation": "Amazon Athena is a serverless query service that enables direct SQL queries against S3 data without infrastructure management. It scales automatically and is ideal for ad-hoc analytics on large datasets.",
+      "reference": "https://docs.aws.amazon.com/athena/latest/ug/what-is.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "3",
+      "difficulty": 3,
+      "question_text": "A real-time application needs to ingest and process millions of streaming data records per second. Which service should be used?",
+      "options": ["A. Amazon SQS", "B. Amazon Kinesis Data Streams", "C. Amazon SNS", "D. AWS Step Functions"],
+      "correct_answer": "B",
+      "explanation": "Amazon Kinesis Data Streams is designed for real-time streaming data ingestion and processing, capable of handling millions of records per second with sub-second latency.",
+      "reference": "https://docs.aws.amazon.com/streams/latest/dev/introduction.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "3",
+      "difficulty": 3,
+      "question_text": "An application needs a shared file system accessible by multiple EC2 instances with POSIX compliance. Which service should be used?",
+      "options": ["A. Amazon EBS Multi-Attach", "B. Amazon EFS", "C. Amazon S3", "D. Amazon FSx for Windows"],
+      "correct_answer": "B",
+      "explanation": "Amazon EFS provides a fully managed, elastic, POSIX-compliant file system that can be mounted concurrently from multiple EC2 instances across multiple Availability Zones.",
+      "reference": "https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "4",
+      "difficulty": 1,
+      "question_text": "Which EC2 pricing option offers the lowest cost for workloads that can be interrupted?",
+      "options": ["A. On-Demand Instances", "B. Reserved Instances", "C. Spot Instances", "D. Dedicated Hosts"],
+      "correct_answer": "C",
+      "explanation": "Spot Instances offer up to 90% discount compared to On-Demand prices for spare EC2 capacity that can be interrupted with 2-minute notice when AWS needs the capacity back.",
+      "reference": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "4",
+      "difficulty": 1,
+      "question_text": "Which S3 storage class is the most cost-effective for infrequently accessed data that needs immediate access?",
+      "options": ["A. S3 Standard", "B. S3 Standard-IA", "C. S3 Glacier", "D. S3 Glacier Deep Archive"],
+      "correct_answer": "B",
+      "explanation": "S3 Standard-Infrequent Access (S3 Standard-IA) offers lower storage costs than S3 Standard while providing millisecond access to data, ideal for infrequently accessed data.",
+      "reference": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "4",
+      "difficulty": 1,
+      "question_text": "Which service helps identify underutilized resources and provides cost optimization recommendations?",
+      "options": ["A. AWS Budgets", "B. AWS Cost Explorer", "C. AWS Trusted Advisor", "D. AWS Config"],
+      "correct_answer": "C",
+      "explanation": "AWS Trusted Advisor analyzes your AWS environment and provides recommendations for cost optimization, including identifying underutilized resources like idle EC2 instances.",
+      "reference": "https://docs.aws.amazon.com/awssupport/latest/user/trusted-advisor.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "4",
+      "difficulty": 1,
+      "question_text": "What is the benefit of using AWS Lambda over EC2 for sporadic workloads?",
+      "options": ["A. Higher performance", "B. Pay only for compute time used", "C. More control over infrastructure", "D. Better security"],
+      "correct_answer": "B",
+      "explanation": "AWS Lambda charges only for the compute time consumed, making it cost-effective for sporadic workloads since you don't pay for idle time like with EC2 instances.",
+      "reference": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "4",
+      "difficulty": 2,
+      "question_text": "A company has predictable workloads running 24/7 for the next 3 years. Which EC2 pricing option provides the best cost savings?",
+      "options": ["A. On-Demand Instances", "B. 3-year Reserved Instances with All Upfront payment", "C. Spot Instances", "D. Savings Plans"],
+      "correct_answer": "B",
+      "explanation": "3-year Reserved Instances with All Upfront payment provide the maximum discount (up to 72%) for predictable, long-term workloads that run continuously.",
+      "reference": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-reserved-instances.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "4",
+      "difficulty": 2,
+      "question_text": "Which S3 feature automatically moves objects to lower-cost storage classes based on access patterns?",
+      "options": ["A. S3 Versioning", "B. S3 Intelligent-Tiering", "C. S3 Lifecycle policies", "D. S3 Replication"],
+      "correct_answer": "B",
+      "explanation": "S3 Intelligent-Tiering automatically moves objects between access tiers based on changing access patterns, optimizing costs without performance impact or operational overhead.",
+      "reference": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/intelligent-tiering.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "4",
+      "difficulty": 2,
+      "question_text": "A company wants to reduce data transfer costs between EC2 instances and S3. What should they implement?",
+      "options": ["A. CloudFront distribution", "B. S3 Transfer Acceleration", "C. VPC Gateway Endpoint for S3", "D. AWS Direct Connect"],
+      "correct_answer": "C",
+      "explanation": "VPC Gateway Endpoints for S3 are free and eliminate data transfer charges for traffic between EC2 instances in the VPC and S3, while keeping traffic within the AWS network.",
+      "reference": "https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "4",
+      "difficulty": 2,
+      "question_text": "Which service allows you to set custom budgets and receive alerts when costs exceed thresholds?",
+      "options": ["A. AWS Cost Explorer", "B. AWS Budgets", "C. AWS Pricing Calculator", "D. AWS Cost and Usage Report"],
+      "correct_answer": "B",
+      "explanation": "AWS Budgets allows you to set custom cost and usage budgets and receive alerts via email or SNS when your actual or forecasted costs exceed your thresholds.",
+      "reference": "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "4",
+      "difficulty": 3,
+      "question_text": "A company runs batch processing jobs that can be interrupted and restarted. Jobs typically run for 2-6 hours. Which combination provides the best cost optimization?",
+      "options": ["A. On-Demand Instances with Auto Scaling", "B. Spot Instances with checkpointing", "C. Reserved Instances with scheduled scaling", "D. Lambda functions with Step Functions"],
+      "correct_answer": "B",
+      "explanation": "Spot Instances with checkpointing provide up to 90% cost savings for interruptible workloads. Checkpointing allows jobs to save progress and resume after interruption.",
+      "reference": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-interruptions.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "4",
+      "difficulty": 3,
+      "question_text": "A company needs to choose between RDS and Aurora for a production database. Which statement about cost is correct?",
+      "options": ["A. Aurora is always cheaper than RDS", "B. RDS is always cheaper than Aurora", "C. Aurora can be more cost-effective due to better performance and reduced read replica needs", "D. Aurora and RDS have identical pricing"],
+      "correct_answer": "C",
+      "explanation": "While Aurora has higher per-hour costs, it can be more cost-effective overall due to up to 5x better performance than MySQL RDS, potentially requiring fewer or smaller instances and read replicas.",
+      "reference": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "4",
+      "difficulty": 3,
+      "question_text": "A company wants to optimize costs for archival data that must be retained for 7 years but is rarely accessed. Retrieval time of 12 hours is acceptable. Which storage should they use?",
+      "options": ["A. S3 Standard-IA", "B. S3 Glacier", "C. S3 Glacier Deep Archive", "D. S3 One Zone-IA"],
+      "correct_answer": "C",
+      "explanation": "S3 Glacier Deep Archive is the lowest-cost storage class, ideal for long-term archival where data retrieval within 12 hours is acceptable. It's up to 75% cheaper than Glacier.",
+      "reference": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "4",
+      "difficulty": 3,
+      "question_text": "A company has multiple AWS accounts and wants to consolidate billing and receive volume discounts. What should they implement?",
+      "options": ["A. AWS Cost Explorer across accounts", "B. AWS Organizations with consolidated billing", "C. Separate AWS Budgets per account", "D. AWS Compute Optimizer"],
+      "correct_answer": "B",
+      "explanation": "AWS Organizations with consolidated billing combines usage across all accounts for volume pricing discounts and provides a single bill, maximizing cost savings from aggregated usage.",
+      "reference": "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/consolidated-billing.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "1",
+      "difficulty": 2,
+      "question_text": "A company needs to allow third-party auditors temporary access to specific AWS resources. Which approach is most secure?",
+      "options": ["A. Create IAM users for auditors", "B. Share root account credentials", "C. Use IAM roles with external ID for cross-account access", "D. Create access keys for auditors"],
+      "correct_answer": "C",
+      "explanation": "IAM roles with external ID provide secure cross-account access for third parties. The external ID adds protection against confused deputy attacks and access is temporary.",
+      "reference": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_create_for-user_externalid.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "1",
+      "difficulty": 3,
+      "question_text": "A company needs to implement a defense-in-depth strategy for their web application. Which combination of services provides the most comprehensive protection?",
+      "options": ["A. Security Groups and NACLs only", "B. AWS WAF, Shield, and Security Groups", "C. AWS WAF, Shield Advanced, CloudFront, Security Groups, and NACLs", "D. Only AWS Shield Advanced"],
+      "correct_answer": "C",
+      "explanation": "A defense-in-depth strategy uses multiple layers: CloudFront for edge protection, WAF for application-layer filtering, Shield Advanced for DDoS protection, and Security Groups/NACLs for network-level controls.",
+      "reference": "https://docs.aws.amazon.com/whitepapers/latest/aws-best-practices-ddos-resiliency/aws-best-practices-ddos-resiliency.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "2",
+      "difficulty": 1,
+      "question_text": "Which AWS service automatically backs up data across multiple facilities?",
+      "options": ["A. Amazon EC2", "B. Amazon EBS", "C. Amazon S3", "D. All of the above with proper configuration"],
+      "correct_answer": "C",
+      "explanation": "Amazon S3 automatically stores data across a minimum of three Availability Zones by default (except One Zone-IA), providing built-in redundancy without additional configuration.",
+      "reference": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/DataDurability.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "2",
+      "difficulty": 2,
+      "question_text": "A company needs to ensure their application can handle a sudden 10x increase in traffic. Which architecture approach should they use?",
+      "options": ["A. Provision for peak capacity at all times", "B. Use Auto Scaling with predictive scaling", "C. Use spot instances only", "D. Manual scaling during peak times"],
+      "correct_answer": "B",
+      "explanation": "Auto Scaling with predictive scaling uses machine learning to predict capacity needs and can scale proactively, handling sudden traffic increases while optimizing costs during normal periods.",
+      "reference": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-predictive-scaling.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "3",
+      "difficulty": 2,
+      "question_text": "A company needs to run a memory-intensive application that processes large datasets. Which EC2 instance type should they choose?",
+      "options": ["A. C5 instances", "B. R5 instances", "C. T3 instances", "D. M5 instances"],
+      "correct_answer": "B",
+      "explanation": "R5 instances are memory-optimized instances designed for memory-intensive applications such as high-performance databases, in-memory caching, and real-time big data analytics.",
+      "reference": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/memory-optimized-instances.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "3",
+      "difficulty": 3,
+      "question_text": "An application needs to serve static content globally with the lowest possible latency. Users are distributed worldwide. What is the optimal architecture?",
+      "options": ["A. S3 bucket in a single region with Transfer Acceleration", "B. CloudFront distribution with S3 origin", "C. Multiple S3 buckets with Route 53 latency-based routing", "D. EC2 instances in multiple regions with ALB"],
+      "correct_answer": "B",
+      "explanation": "CloudFront with S3 origin caches content at 400+ edge locations worldwide, providing the lowest latency for static content delivery to globally distributed users.",
+      "reference": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/GettingStarted.SimpleDistribution.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "4",
+      "difficulty": 1,
+      "question_text": "Which pricing model should a company choose for an application with unpredictable traffic patterns?",
+      "options": ["A. Reserved Instances", "B. On-Demand Instances", "C. Spot Instances", "D. Dedicated Hosts"],
+      "correct_answer": "B",
+      "explanation": "On-Demand Instances are best for unpredictable workloads as you pay by the hour or second with no upfront commitment, providing flexibility to scale up or down based on actual demand.",
+      "reference": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-on-demand-instances.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "4",
+      "difficulty": 2,
+      "question_text": "A company runs development and test environments that are only used during business hours. How can they reduce costs?",
+      "options": ["A. Use Reserved Instances", "B. Use Instance Scheduler to stop instances outside business hours", "C. Use Spot Instances only", "D. Move to larger instances"],
+      "correct_answer": "B",
+      "explanation": "AWS Instance Scheduler automatically stops and starts EC2 and RDS instances based on schedules, reducing costs by up to 70% for instances that don't need to run 24/7.",
+      "reference": "https://docs.aws.amazon.com/solutions/latest/instance-scheduler-on-aws/solution-overview.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "1",
+      "difficulty": 1,
+      "question_text": "Which service should be used to protect a web application from SQL injection attacks?",
+      "options": ["A. AWS Shield", "B. AWS WAF", "C. Amazon GuardDuty", "D. Security Groups"],
+      "correct_answer": "B",
+      "explanation": "AWS WAF (Web Application Firewall) protects web applications from common web exploits including SQL injection by filtering malicious requests based on customizable rules.",
+      "reference": "https://docs.aws.amazon.com/waf/latest/developerguide/what-is-aws-waf.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "2",
+      "difficulty": 3,
+      "question_text": "A company needs to implement a multi-region active-active architecture for their application. Which database solution supports this requirement?",
+      "options": ["A. RDS Multi-AZ", "B. Aurora Global Database (write forwarding)", "C. DynamoDB Global Tables", "D. RDS Read Replicas"],
+      "correct_answer": "C",
+      "explanation": "DynamoDB Global Tables provide fully replicated, multi-region, multi-active database tables that allow read and write operations in any region with automatic conflict resolution.",
+      "reference": "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "3",
+      "difficulty": 1,
+      "question_text": "Which AWS service provides block-level storage for EC2 instances?",
+      "options": ["A. Amazon S3", "B. Amazon EFS", "C. Amazon EBS", "D. AWS Storage Gateway"],
+      "correct_answer": "C",
+      "explanation": "Amazon Elastic Block Store (EBS) provides block-level storage volumes that can be attached to EC2 instances, functioning like raw, unformatted block devices.",
+      "reference": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AmazonEBS.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "3",
+      "difficulty": 2,
+      "question_text": "A company needs to migrate an on-premises Oracle database to AWS with minimal code changes. Which service should they use?",
+      "options": ["A. Amazon DynamoDB", "B. Amazon RDS for Oracle", "C. Amazon Aurora", "D. Amazon Redshift"],
+      "correct_answer": "B",
+      "explanation": "Amazon RDS for Oracle provides a managed Oracle database service that is compatible with existing Oracle applications, requiring minimal to no code changes for migration.",
+      "reference": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Oracle.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "4",
+      "difficulty": 3,
+      "question_text": "A company wants to compare the costs of running their workload on different EC2 instance types. Which tool should they use?",
+      "options": ["A. AWS Cost Explorer", "B. AWS Compute Optimizer", "C. AWS Pricing Calculator", "D. AWS Budgets"],
+      "correct_answer": "B",
+      "explanation": "AWS Compute Optimizer analyzes your actual resource utilization and recommends optimal AWS resources including EC2 instance types, showing potential cost savings from rightsizing.",
+      "reference": "https://docs.aws.amazon.com/compute-optimizer/latest/ug/what-is-compute-optimizer.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "1",
+      "difficulty": 2,
+      "question_text": "A company needs to log all API calls made to their AWS account for security and compliance purposes. Which service should they use?",
+      "options": ["A. Amazon CloudWatch", "B. AWS CloudTrail", "C. AWS Config", "D. VPC Flow Logs"],
+      "correct_answer": "B",
+      "explanation": "AWS CloudTrail logs all API calls made to AWS services in your account, providing a complete audit trail for security analysis, resource change tracking, and compliance auditing.",
+      "reference": "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "2",
+      "difficulty": 1,
+      "question_text": "What happens when an EC2 instance in an Auto Scaling group fails a health check?",
+      "options": ["A. Nothing, the instance continues running", "B. An alert is sent but the instance keeps running", "C. The instance is terminated and replaced", "D. The instance is stopped but not terminated"],
+      "correct_answer": "C",
+      "explanation": "When an EC2 instance fails health checks in an Auto Scaling group, Auto Scaling terminates the unhealthy instance and launches a replacement to maintain the desired capacity.",
+      "reference": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/healthcheck.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "3",
+      "difficulty": 1,
+      "question_text": "Which service enables running code without provisioning or managing servers?",
+      "options": ["A. Amazon EC2", "B. Amazon ECS", "C. AWS Lambda", "D. AWS Batch"],
+      "correct_answer": "C",
+      "explanation": "AWS Lambda is a serverless compute service that runs code in response to events and automatically manages the underlying compute resources, without requiring server provisioning.",
+      "reference": "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+    },
+    {
+      "exam_type": "SAA-C03",
+      "domain": "4",
+      "difficulty": 2,
+      "question_text": "A company wants to use a mix of On-Demand and Spot Instances for their web application. Which feature allows this while maintaining availability?",
+      "options": ["A. Auto Scaling groups with mixed instances policy", "B. Spot Fleet only", "C. Reserved Instances", "D. Dedicated Hosts"],
+      "correct_answer": "A",
+      "explanation": "Auto Scaling groups with mixed instances policy allow you to combine On-Demand and Spot Instances, maintaining availability by automatically replacing Spot interruptions with On-Demand if needed.",
+      "reference": "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-mixed-instances-groups.html"
+    }
+  ]
+}

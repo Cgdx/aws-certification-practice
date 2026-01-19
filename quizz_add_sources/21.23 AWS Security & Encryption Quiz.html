@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz</title>
+    <style>
+      * {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+          Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-size: 16px;
+      }
+
+      main {
+        padding-top: 48px;
+      }
+
+      :root {
+        --large-device-width: 850px;
+        --primary-color: #0f172a;
+        --secondary-color: #020617;
+        --primary-text-color: #c7d1dd;
+        --secondary-text-color: #061602;
+        --success-background: hsl(159, 82%, 24%);
+        --success-foreground: hsl(164, 86%, 16%);
+        --success: hsl(160, 84%, 39%);
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --info-background: hsl(218, 81%, 8%);
+        --info-foreground: hsl(217, 91%, 85%);
+        --border-color: #d1d7dc;
+        --check-box-size: 20px;
+        /* control the size */
+        --check-box-color: var(--info-foreground);
+        /* the active color */
+      }
+
+      body {
+        position: relative;
+        background-color: #020617;
+        color: var(--primary-text-color);
+      }
+
+      #score-stats-container {
+        position: fixed;
+        z-index: 10;
+        top: 0;
+        height: 40px;
+        width: 100%;
+        background-color: var(--info-background);
+
+        padding: 0px 16px;
+        color: var(--info-foreground);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      #quiz-container {
+        border-radius: 8px;
+        display: flex;
+        gap: 16px;
+        flex-direction: column;
+      }
+
+      input[type='radio'] {
+        height: var(--check-box-size);
+        aspect-ratio: 1;
+        border: calc(var(--check-box-size) / 8) solid #939393;
+        padding: calc(var(--check-box-size) / 8);
+        background: radial-gradient(farthest-side, var(--check-box-color) 94%, #0000) 50%/0 0 no-repeat
+          content-box;
+        border-radius: 50%;
+        outline-offset: calc(var(--check-box-size) / 10);
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        cursor: pointer;
+        font-size: inherit;
+        transition: 0.3s;
+      }
+
+      input[type='radio']:checked {
+        border-color: var(--check-box-color);
+        background-size: 100% 100%;
+      }
+
+      input[type='radio']:disabled {
+        background: linear-gradient(#939393 0 0) 50%/100% 20% no-repeat content-box;
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      label {
+        /* display: inline-flex; */
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        padding: 4px 6px;
+        border-radius: 4px;
+      }
+
+      @media (max-width: 767px) {
+        input[type='radio'],
+        label {
+          cursor: default;
+        }
+
+        #quiz-container {
+          margin-left: 8px;
+          margin-right: 8px;
+        }
+      }
+
+      /* PC (Desktop devices) */
+      @media (min-width: 768px) {
+        body {
+          display: flex;
+          justify-content: center;
+        }
+
+        main {
+          max-width: var(--large-device-width);
+        }
+
+        #score-stats-container {
+          max-width: var(--large-device-width);
+        }
+
+        dialog {
+          max-width: var(--large-device-width);
+        }
+      }
+
+      @media print {
+        input[type='radio'] {
+          background: none !important;
+          border-color: #939393 !important;
+        }
+
+        input[type='radio']:checked {
+          border-color: #939393 !important;
+        }
+      }
+
+      .question-lable {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      button {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        outline: none;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+      }
+
+      .button {
+        background-color: var(--success-background);
+        border: none;
+        color: #f4f5f7;
+        opacity: 0.8;
+        font-size: 18px;
+        flex-grow: 1;
+        padding: 8px 16px;
+        border-radius: 8px;
+      }
+
+      .button:hover {
+        opacity: 1;
+      }
+
+      .explanation-btn {
+        border: none;
+        color: var(--success);
+        background-color: transparent;
+      }
+
+      #submit-button:active::after {
+        background-color: #ef4444;
+      }
+
+      .single-question-container {
+        background-color: var(--primary-color);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 16px;
+        border-radius: 8px;
+      }
+
+      #modal-content {
+        padding: 16px;
+        line-height: 24px;
+      }
+
+      dialog::backdrop {
+        background: rgba(0, 0, 0, 0.5);
+      }
+
+      dialog {
+        position: fixed;
+        border: 1px solid var(--border-color);
+        background-color: var(--primary-color);
+        color: rgb(240, 241, 248);
+        padding: 16px;
+        border-radius: 8px;
+        width: 80vw;
+        max-height: 80vh;
+        overflow: auto;
+        top: 50%;
+        left: 50%;
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        -moz-transform: translateX(-50%) translateY(-50%);
+        -ms-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+      }
+
+      #close-modal-btn {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        padding: 2px 8px;
+        border-radius: 2px;
+        border: none;
+        background-color: var(--danger);
+      }
+
+      .correct-answer label {
+        border: 2px solid var(--success);
+        width: 100%;
+      }
+
+      .incorrect-answer label {
+        border: 2px solid var(--danger);
+        width: 100%;
+      }
+
+      .options-container {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      #quiz-meta-container {
+        border-radius: 8px;
+        background-color: var(--primary-color);
+        margin-bottom: 12px;
+        padding: 8px;
+      }
+
+      #quiz-title {
+        text-align: center;
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+
+      #quiz-description {
+        line-height: 1.5;
+        padding: 2px 6px;
+      }
+      img {
+        width: 100%;
+      }
+    </style>
+  </head>
+
+  <body onload="main()">
+    <main>
+      <section id="quiz-meta-container">
+        <h1 id="quiz-title"></h1>
+        <p id="quiz-description"></p>
+      </section>
+      <section id="score-stats-container">
+        <div id="score-card">
+          Score: <span id="current-score">999</span> of
+          <span id="pass-percent">999%</span>
+        </div>
+        <div>Correct: <span id="correct-answers">999</span></div>
+        <div>Incorrect: <span id="wrong-answers">999</span></div>
+      </section>
+
+      <section id="quiz-container"></section>
+
+      <dialog id="modal" class="modal-container">
+        <div id="modal-content">
+          <p id="modal-text"></p>
+        </div>
+      </dialog>
+    </main>
+
+    <script>
+      const quizData = {"quiz_id":5337477,"quiz_title":"AWS Security & Encryption Quiz","questions":[{"_class":"assessment","id":37603573,"assessment_type":"multiple-choice","prompt":{"feedbacks":["","In-flight Encryption = HTTPS, and HTTPS can not be enabled without an SSL certificate.",""],"relatedLectureIds":"","answers":["<p>an HTTP endpoint with an SSL certificate</p>","<p>an HTTPS endpoint with an SSL certificate</p>","<p>a TCP endpoint</p>"],"question":"<p>To enable In-flight Encryption (In-Transit Encryption), we need to have ........................</p>"},"correct_response":["b"],"section":"","question_plain":"To enable In-flight Encryption (In-Transit Encryption), we need to have ........................","related_lectures":[]},{"_class":"assessment","id":37603575,"assessment_type":"multiple-choice","prompt":{"feedbacks":["","Server-Side Encryption means the server will encrypt the data for us. We don't need to encrypt it beforehand."],"answers":["<p>True</p>","<p>False</p>"],"question":"<p>Server-Side Encryption means that the data is sent encrypted to the server.</p>","relatedLectureIds":""},"correct_response":["b"],"section":"","question_plain":"Server-Side Encryption means that the data is sent encrypted to the server.","related_lectures":[]},{"_class":"assessment","id":37603643,"assessment_type":"multiple-choice","prompt":{"question":"<p>In Server-Side Encryption, where do the encryption and decryption happen?</p>","relatedLectureIds":"","feedbacks":["In Server-Side Encryption, we can't do encryption/decryption ourselves as we don't have access to the corresponding encryption key.","","",""],"answers":["<p>Both Encryption and Decryption happen on the server</p>","<p>Both Encryption and Decryption happen on the client</p>","<p>Encryption happens on the server and Decryption happens on the client</p>","<p>Encryption happens on the client and Decryption happens on the server</p>"]},"correct_response":["a"],"section":"","question_plain":"In Server-Side Encryption, where do the encryption and decryption happen?","related_lectures":[]},{"_class":"assessment","id":37603651,"assessment_type":"multiple-choice","prompt":{"relatedLectureIds":"","feedbacks":["With Client-Side Encryption, the server doesn't need to know any information about the encryption scheme being used, as the server will not perform any encryption or decryption operations.",""],"question":"<p>In Client-Side Encryption, the server must know our encryption scheme before we can upload the data.</p>","answers":["<p>False</p>","<p>True</p>"]},"correct_response":["a"],"section":"","question_plain":"In Client-Side Encryption, the server must know our encryption scheme before we can upload the data.","related_lectures":[]},{"_class":"assessment","id":37603721,"assessment_type":"multiple-choice","prompt":{"relatedLectureIds":"","answers":["<p>True</p>","<p>False</p>"],"question":"<p>You need to create KMS Keys in AWS KMS before you are able to use the encryption features for EBS, S3, RDS ...</p>","feedbacks":["You could also create your own keys for AWS to do the encryption, but it's not mandatory.","You can use the AWS Managed Service keys in KMS, therefore we don't need to create our own KMS keys."]},"correct_response":["b"],"section":"","question_plain":"You need to create KMS Keys in AWS KMS before you are able to use the encryption features for EBS, S3, RDS ...","related_lectures":[]},{"_class":"assessment","id":37603725,"assessment_type":"multiple-choice","prompt":{"question":"<p>AWS KMS supports both symmetric and asymmetric KMS keys.</p>","feedbacks":["KMS keys can be symmetric or asymmetric. A symmetric KMS key represents a 256-bit key used for encryption and decryption. An asymmetric KMS key represents an RSA key pair used for encryption and decryption or signing and verification, but not both. Or it represents an elliptic curve (ECC) key pair used for signing and verification.",""],"relatedLectureIds":"","answers":["<p>True</p>","<p>False</p>"]},"correct_response":["a"],"section":"","question_plain":"AWS KMS supports both symmetric and asymmetric KMS keys.","related_lectures":[]},{"_class":"assessment","id":37603727,"assessment_type":"multiple-choice","prompt":{"answers":["<p>90 days</p>","<p>1 year</p>","<p>2 years</p>","<p>3 years</p>"],"feedbacks":["","","",""],"relatedLectureIds":"","question":"<p>When you enable Automatic Rotation on your KMS Key, the backing key is rotated every .................</p>"},"correct_response":["b"],"section":"","question_plain":"When you enable Automatic Rotation on your KMS Key, the backing key is rotated every .................","related_lectures":[]},{"_class":"assessment","id":37603797,"assessment_type":"multiple-choice","prompt":{"relatedLectureIds":"","answers":["<p>The other AWS account needs to logout and login again to refresh its credentials</p>","<p>You need to share the KMS CMK used to encrypt the AMI with the other AWS account</p>","<p>You can't share an AMI that has an encrypted EBS snapshot</p>"],"question":"<p>You have an AMI that has an encrypted EBS snapshot using KMS CMK. You want to share this AMI with another AWS account. You have shared the AMI with the desired AWS account, but the other AWS account still can't use it. How would you solve this problem?</p>","feedbacks":["","",""]},"correct_response":["b"],"section":"","question_plain":"You have an AMI that has an encrypted EBS snapshot using KMS CMK. You want to share this AMI with another AWS account. You have shared the AMI with the desired AWS account, but the other AWS account still can't use it. How would you solve this problem?","related_lectures":[]},{"_class":"assessment","id":37603803,"assessment_type":"multiple-choice","prompt":{"question":"<p>You have created a Customer-managed CMK in KMS that you use to encrypt both S3 buckets and EBS snapshots. Your company policy mandates that your encryption keys be rotated every 6 months. What should you do?</p>","relatedLectureIds":"","feedbacks":["","","It is better to use Automatic Key Rotation and configure Retention Period"],"answers":["<p>Re-configure your KMS CMK and enable Automatic Key Rotation, and configure the Retention Period with 180 days</p>","<p>Use AWS Managed Keys as they are automatically rotated by AWS every 3 months</p>","<p>Rotate the KMS CMK manually. Create a new KMS CMK and use Key Aliases to reference the new KMS CMK. Keep the old KMS CMK so you can decrypt the old data</p>"]},"correct_response":["a"],"section":"","question_plain":"You have created a Customer-managed CMK in KMS that you use to encrypt both S3 buckets and EBS snapshots. Your company policy mandates that your encryption keys be rotated every 6 months. What should you do?","related_lectures":[]},{"_class":"assessment","id":37603807,"assessment_type":"multiple-choice","prompt":{"relatedLectureIds":"","answers":["<p>KMS Key Policies</p>","<p>KMS IAM Policy</p>","<p>AWS GuardDuty</p>","<p>KMS Access Control List (KMS ACL)</p>"],"question":"<p>What should you use to control access to your KMS CMKs?</p>","feedbacks":["","","",""]},"correct_response":["a"],"section":"","question_plain":"What should you use to control access to your KMS CMKs?","related_lectures":[]},{"_class":"assessment","id":37603905,"assessment_type":"multiple-choice","prompt":{"answers":["<p>Embed it in the code</p>","<p>Have it as a plaintext environment variable</p>","<p>Have it as an encrypted environment variable and decrypt it at runtime</p>"],"relatedLectureIds":"","question":"<p>You have a Lambda function used to process some data in the database. You would like to give your Lambda function access to the database password. Which of the following options is the most secure?</p>","feedbacks":["This is not secure.","This is not secure.","This is the most secure solution amongst these options."]},"correct_response":["c"],"section":"","question_plain":"You have a Lambda function used to process some data in the database. You would like to give your Lambda function access to the database password. Which of the following options is the most secure?","related_lectures":[]},{"_class":"assessment","id":37604003,"assessment_type":"multiple-choice","prompt":{"feedbacks":["AWS KMS can rotate stored KMS keys, but it can not help audit the values of an encrypted value over time.","SSM Parameters Store can be used to store secrets and has built-in version tracking capability. Each time you edit the value of a parameter, SSM Parameter Store creates a new version of the parameter and retains the previous versions. You can view the details, including the values, of all versions in a parameter's history.","Amazon S3 has both versioning and encryption features, but it is not the best fit for storing secrets."],"answers":["<p>AWS KMS Versioning feature</p>","<p>SSM Parameter Store</p>","<p>Amazon S3</p>"],"question":"<p>You have a secret value that you use for encryption purposes, and you want to store and track the values of this secret over time. Which AWS service should you use?</p>","relatedLectureIds":""},"correct_response":["b"],"section":"","question_plain":"You have a secret value that you use for encryption purposes, and you want to store and track the values of this secret over time. Which AWS service should you use?","related_lectures":[]},{"_class":"assessment","id":37604021,"assessment_type":"multiple-choice","prompt":{"answers":["<p>AWS WAF</p>","<p>AWS Shield Advanced</p>","<p>AWS Shield</p>","<p>AWS DDoS OpsTeam</p>"],"relatedLectureIds":"","feedbacks":["","","",""],"question":"<p>Your user-facing website is a high-risk target for DDoS attacks and you would like to get 24/7 support in case they happen and AWS bill reimbursement for the incurred costs during the attack. What AWS service should you use?</p>"},"correct_response":["b"],"section":"","question_plain":"Your user-facing website is a high-risk target for DDoS attacks and you would like to get 24/7 support in case they happen and AWS bill reimbursement for the incurred costs during the attack. What AWS service should you use?","related_lectures":[]},{"_class":"assessment","id":37604025,"assessment_type":"multiple-choice","prompt":{"relatedLectureIds":"","answers":["<p>Amazon DynamoDB</p>","<p>Amazon S3</p>","<p>Amazon EBS</p>","<p>SSM Parameter Store</p>"],"question":"<p>You would like to externally maintain the configuration values of your main database, to be picked up at runtime by your application. What's the best place to store them to maintain control and version history?</p>","feedbacks":["","","",""]},"correct_response":["d"],"section":"","question_plain":"You would like to externally maintain the configuration values of your main database, to be picked up at runtime by your application. What's the best place to store them to maintain control and version history?","related_lectures":[]},{"_class":"assessment","id":37604037,"assessment_type":"multiple-choice","prompt":{"feedbacks":["","","",""],"relatedLectureIds":"","question":"<p>AWS GuardDuty scans the following data sources, <strong>EXCEPT</strong> ................</p>","answers":["<p>CloudTrail Logs</p>","<p>VPC Flow Logs</p>","<p>DNS Logs</p>","<p>CloudWatch Logs</p>"]},"correct_response":["d"],"section":"","question_plain":"AWS GuardDuty scans the following data sources, EXCEPT ................","related_lectures":[]},{"_class":"assessment","id":37604041,"assessment_type":"multiple-choice","prompt":{"question":"<p>You have a website hosted on a fleet of EC2 instances fronted by an Application Load Balancer. What should you use to protect your website from common web application attacks (e.g., SQL Injection)?</p>","feedbacks":["","","",""],"relatedLectureIds":"","answers":["<p>AWS Shield</p>","<p>AWS WAF</p>","<p>AWS Security Hub</p>","<p>AWS GuardDuty</p>"]},"correct_response":["b"],"section":"","question_plain":"You have a website hosted on a fleet of EC2 instances fronted by an Application Load Balancer. What should you use to protect your website from common web application attacks (e.g., SQL Injection)?","related_lectures":[]},{"_class":"assessment","id":37604045,"assessment_type":"multiple-choice","prompt":{"answers":["<p>AWS Shield</p>","<p>Amazon GuardDuty</p>","<p>Amazon Inspector</p>","<p>AWS Config</p>"],"relatedLectureIds":"","feedbacks":["","","",""],"question":"<p>You would like to analyze OS vulnerabilities from within EC2 instances. You need these analyses to occur weekly and provide you with concrete recommendations in case vulnerabilities are found. Which AWS service should you use?</p>"},"correct_response":["c"],"section":"","question_plain":"You would like to analyze OS vulnerabilities from within EC2 instances. You need these analyses to occur weekly and provide you with concrete recommendations in case vulnerabilities are found. Which AWS service should you use?","related_lectures":[]},{"_class":"assessment","id":37604051,"assessment_type":"multiple-choice","prompt":{"question":"<p>What is the most suitable AWS service for storing RDS DB passwords which also provides you automatic rotation?</p>","answers":["<p>AWS Secrets Manager</p>","<p>AWS KMS</p>","<p>AWS SSM Parameter Store</p>"],"relatedLectureIds":"","feedbacks":["","",""]},"correct_response":["a"],"section":"","question_plain":"What is the most suitable AWS service for storing RDS DB passwords which also provides you automatic rotation?","related_lectures":[]},{"_class":"assessment","id":37604055,"assessment_type":"multiple-choice","prompt":{"answers":["<p>AWS Shield</p>","<p>AWS GuardDuty</p>","<p>AWS Config</p>","<p>AWS Firewall Manager</p>"],"question":"<p>Which AWS service allows you to centrally manage EC2 Security Groups and AWS Shield Advanced across all AWS accounts in your AWS Organization?</p>","relatedLectureIds":"","feedbacks":["","","","AWS Firewall Manager is a security management service that allows you to centrally configure and manage firewall rules across your accounts and applications in AWS Organizations. It is integrated with AWS Organizations so you can enable AWS WAF rules, AWS Shield Advanced protection, security groups, AWS Network Firewall rules, and Amazon Route 53 Resolver DNS Firewall rules."]},"correct_response":["d"],"section":"","question_plain":"Which AWS service allows you to centrally manage EC2 Security Groups and AWS Shield Advanced across all AWS accounts in your AWS Organization?","related_lectures":[]},{"_class":"assessment","id":37604063,"assessment_type":"multiple-choice","prompt":{"question":"<p>Which AWS service helps you protect your sensitive data stored in S3 buckets?</p>","relatedLectureIds":"","answers":["<p>Amazon GuardDuty</p>","<p>Amazon Shield</p>","<p>Amazon Macie</p>","<p>AWS KMS</p>"],"feedbacks":["","","Amazon Macie is a fully managed data security service that uses Machine Learning to discover and protect your sensitive data stored in S3 buckets. It automatically provides an inventory of S3 buckets including a list of unencrypted buckets, publicly accessible buckets, and buckets shared with other AWS accounts. It allows you to identify and alert you to sensitive data, such as Personally Identifiable Information (PII).",""]},"correct_response":["c"],"section":"","question_plain":"Which AWS service helps you protect your sensitive data stored in S3 buckets?","related_lectures":[]},{"_class":"assessment","id":51343764,"assessment_type":"multiple-choice","prompt":{"question":"<p>An online-payment company is using AWS to host its infrastructure. The frontend is created using VueJS and is hosted on an S3 bucket and the backend is developed using PHP and is hosted on EC2 instances in an Auto Scaling Group. As their customers are worldwide, they use both CloudFront and Aurora Global database to implement multi-region deployments to provide the lowest latency and provide availability, and resiliency. A new feature required which gives customers the ability to store data encrypted on the database and this data must not be disclosed even by the company admins. The data should be encrypted on the client side and stored in an encrypted format. What do you recommend to implement this?</p>","relatedLectureIds":"","feedbacks":["","","",""],"answers":["<p>Using Aurora Client-side Encryption and KMS Multi-region Keys</p>","<p>Using Lambda Client-side Encryption and KMS Multi-region Keys</p>","<p>Using Aurora Client-side Encryption and CloudHSM</p>","<p>Using Lambda Client-side Encryption and CloudHSM</p>"]},"correct_response":["a"],"section":"","question_plain":"An online-payment company is using AWS to host its infrastructure. The frontend is created using VueJS and is hosted on an S3 bucket and the backend is developed using PHP and is hosted on EC2 instances in an Auto Scaling Group. As their customers are worldwide, they use both CloudFront and Aurora Global database to implement multi-region deployments to provide the lowest latency and provide availability, and resiliency. A new feature required which gives customers the ability to store data encrypted on the database and this data must not be disclosed even by the company admins. The data should be encrypted on the client side and stored in an encrypted format. What do you recommend to implement this?","related_lectures":[]},{"_class":"assessment","id":51343786,"assessment_type":"multiple-choice","prompt":{"question":"<p>You have an S3 bucket that is encrypted with SSE-KMS. You have been tasked to replicate the objects to a target bucket in the same AWS region but with a different KMS Key. You have configured the S3 replication, the target bucket, and the target KMS key and it is still not working. What is missing to make the S3 replication work?</p>","relatedLectureIds":"","feedbacks":["","","",""],"answers":["<p>This is not a supported feature</p>","<p>You have to raise a support ticket for AWS to start this replication process for you</p>","<p>You have to configure permissions for both Source KMS Key <code>kms:Decrypt</code> and Target KMS Key <code>kms:Encrypt</code> to be used by the S3 Replication Service</p>","<p>The source KMS Key and the target KMS key must be the same</p>"]},"correct_response":["c"],"section":"","question_plain":"You have an S3 bucket that is encrypted with SSE-KMS. You have been tasked to replicate the objects to a target bucket in the same AWS region but with a different KMS Key. You have configured the S3 replication, the target bucket, and the target KMS key and it is still not working. What is missing to make the S3 replication work?","related_lectures":[]},{"_class":"assessment","id":51343790,"assessment_type":"multiple-choice","prompt":{"question":"<p>You have generated a public certificate using LetsEncrypt and uploaded it to the ACM so you can use and attach to an Application Load Balancer that forwards traffic to EC2 instances. As this certificate is generated outside of AWS, it does not support the automatic renewal feature. How would you be notified 30 days before this certificate expires so you can manually generate a new one?</p>","relatedLectureIds":"","feedbacks":["","","",""],"answers":["<p>Configure ACM to send notifications by linking it to 3rd party certificate provider LetsEncrypt</p>","<p>Configure EventBridge for Daily Expiration Events from ACM to invoke SNS notifications to your email</p>","<p>Configure EventBridge for Monthly Expiration Events from ACM to invoke SNS notifications to your email</p>","<p>Configure CloudWatch Alarms for Daily Expiration Events from ACM to invoke SNS notifications to your email</p>"]},"correct_response":["b"],"section":"","question_plain":"You have generated a public certificate using LetsEncrypt and uploaded it to the ACM so you can use and attach to an Application Load Balancer that forwards traffic to EC2 instances. As this certificate is generated outside of AWS, it does not support the automatic renewal feature. How would you be notified 30 days before this certificate expires so you can manually generate a new one?","related_lectures":[]},{"_class":"assessment","id":51343794,"assessment_type":"multiple-choice","prompt":{"question":"<p>You have created the main Edge-Optimized API Gateway in <code>us-west-2</code> AWS region. This main Edge-Optimized API Gateway forwards traffic to the second level API Gateway in <code>ap-southeast-1</code>. You want to secure the main API Gateway by attaching an ACM certificate to it. Which AWS region are you going to create the ACM certificate in?</p>","relatedLectureIds":"","feedbacks":["As the Edge-Optimized API Gateway is using a custom AWS managed CloudFront distribution behind the scene to route requests across the globe through CloudFront Edge locations, the ACM certificate must be created in us-east-1.","","",""],"answers":["<p><code>us-east-1</code> </p>","<p><code>us-west-2</code> </p>","<p><code>ap-southeast-1</code> </p>","<p>Both <code>us-east-1</code> and <code>us-west-2</code> works</p>"]},"correct_response":["a"],"section":"","question_plain":"You have created the main Edge-Optimized API Gateway in us-west-2 AWS region. This main Edge-Optimized API Gateway forwards traffic to the second level API Gateway in ap-southeast-1. You want to secure the main API Gateway by attaching an ACM certificate to it. Which AWS region are you going to create the ACM certificate in?","related_lectures":[]},{"_class":"assessment","id":51343950,"assessment_type":"multiple-choice","prompt":{"question":"<p>You are managing an AWS Organization with multiple AWS accounts. Each account has a separate application with different resources. You want an easy way to manage Security Groups and WAF Rules across those accounts as there was a security incident the last week and you want to tighten up your resources. Which AWS service can help you to do so?</p>","relatedLectureIds":"","feedbacks":["","","",""],"answers":["<p>AWS Guard Duty</p>","<p>Amazon Shield</p>","<p>Amazon Inspector</p>","<p>AWS Firewall Manager</p>"]},"correct_response":["d"],"section":"","question_plain":"You are managing an AWS Organization with multiple AWS accounts. Each account has a separate application with different resources. You want an easy way to manage Security Groups and WAF Rules across those accounts as there was a security incident the last week and you want to tighten up your resources. Which AWS service can help you to do so?","related_lectures":[]}]};
+      let correct = new Set();
+      let incorrect = new Set();
+      let totalNumberOfQuestions = 0;
+      const quizTitle = quizData.quiz_title;
+      const quizDescription = quizData.quiz_description;
+      const questionData = quizData.questions;
+      const passPercent = quizData.pass_percent;
+      const modalTextElement = document.getElementById('modal-text');
+      const quizContainerElement = document.getElementById('quiz-container');
+
+      const dialog = document.querySelector('dialog');
+      const showButton = document.getElementById('view-explanatin');
+      const closeButton = document.getElementById('close-modal-btn');
+      const quizTitleElement = document.getElementById('quiz-title');
+      const quizDescriptionElement = document.getElementById('quiz-description');
+
+      function main() {
+        // update quiz meta data
+        document.title = quizTitle;
+        quizTitleElement.innerHTML = quizTitle;
+        quizDescriptionElement.innerHTML = quizDescription;
+
+        const passPercentElement = document.getElementById('pass-percent');
+        passPercentElement.innerHTML = passPercent + '%';
+        totalNumberOfQuestions = questionData.length;
+        // shuffle the questionData to randomize the order of the questions
+        for (let i = questionData.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [questionData[i], questionData[j]] = [questionData[j], questionData[i]];
+        }
+
+        let formattedQuestions = questionData.map(formatSingleQuestionData);
+        updateScore();
+        // display the formattedQuestions
+        formattedQuestions.forEach((question, idx) => {
+          renderSingleQuestion(question, idx + 1);
+        });
+      }
+
+      /**
+       * Formats the question data from the given QuizData object.
+       *
+       * @param {Object} singleQuizData - The singleQuizData object containing prompt and correct_response.
+       * @return {Object} The formatted question object with the following properties:
+       *   - id: The ID of the question.
+       *   - question: The text of the question.
+       *   - answers: The array of answer options.
+       *   - correctAnswer: The text of the correct answer.
+       *   - explanation: The explanation of the correct answer.
+       */
+      function formatSingleQuestionData(singleQuizData = null) {
+        const { prompt, correct_response, id } = singleQuizData;
+        const questionText = prompt.question;
+        const answers = prompt.answers;
+        const correctAnswer = correct_response[0];
+        const correctAnswerText = answers[correctAnswer.toLowerCase().charCodeAt(0) - 97];
+        const questionObj = {
+          id: id,
+          question: questionText,
+          answers: answers,
+          correctAnswer,
+          explanation: prompt?.explanation || '',
+        };
+        return questionObj;
+      }
+
+      /**
+       * Renders a single question with its options and submit button.
+       *
+       * @param {Object} singleQuestionData - The data of the question to render.
+       * @param {number} rootIndex - The index of the question in the quiz.
+       * @return {void} return nothing.
+       */
+
+      const renderSingleQuestion = (singleQuestionData = {}, rootIndex = 1) => {
+        const { id, explanation, answers, correctAnswer, question } = singleQuestionData;
+        // shuffle the answers to randomize the order of the answers
+        // for (let i = answers.length - 1; i > 0; i--) {
+        //   const j = Math.floor(Math.random() * (i + 1));
+        //   [answers[i], answers[j]] = [answers[j], answers[i]];
+        // }
+        const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+        const optionsHTML = answers
+          .map((option, index) => {
+            const optionId = `${id}_${index}`;
+
+            return `
+        <div class="question-lable">
+          <input type="radio" id="${optionId}" name="${'answer'}" value="${alphabet[index]}" />
+          <label for="${optionId}">${option}</label>
+        </div>
+      `;
+          })
+
+          .join('');
+
+        const container = document.createElement('div');
+        container.innerHTML = `
+        <form data-correct-answer="${correctAnswer}" data-question-id="${id}" class="single-question-container" onsubmit="submitButtonListener(event)">
+          <div style="display: flex;justify-content: space-between;">
+            <p style="font-weight: 600">Question ${rootIndex}:</p>
+            <button type="button" onclick="renderExplanation(event)" id="${`explanation-${id}`}" data-explanation="${'tt'}" data-explanation-id=${id} class="explanation-btn">View Explanation</button>
+          </div>
+          <p style="margin-bottom: 8px;line-height: 1.5">${question}</p>
+          <div class="options-container">
+            ${optionsHTML}
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button type="submit" id="submit-button" class="button">Submit</button>
+          </div>
+        </form>
+      `;
+        quizContainerElement.appendChild(container);
+      };
+
+      /**
+       * Updates the score on the page based on the number of correct and incorrect answers.
+       *
+       * @return {void} This function does not return a value.
+       */
+      function updateScore() {
+        const currentParcentageElement = document.getElementById('current-score');
+        const correctAnswerElement = document.getElementById('correct-answers');
+        const wrongAnswerElement = document.getElementById('wrong-answers');
+        correctAnswerElement.innerHTML = correct.size;
+        wrongAnswerElement.innerHTML = incorrect.size;
+        const score = Number((correct.size / totalNumberOfQuestions) * 100).toFixed(2);
+        currentParcentageElement.innerHTML = score;
+      }
+
+      /**
+       * Handles the event when the submit button is clicked.
+       *
+       * @param {Event} e - The event object.
+       * @return {void} This function does not return anything.
+       */
+      const submitButtonListener = e => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const form = e.target;
+        const selectedOption = e.target.querySelector('input[type="radio"]:checked');
+        if (!selectedOption) {
+          alert('Please select an answer!');
+          return;
+        }
+
+        let isCorrect = false;
+        const { answer: userAnswer } = Object.fromEntries(formData.entries());
+        const correctAnswer = e.target.dataset.correctAnswer;
+        const questionId = e.target.dataset.questionId;
+        if (userAnswer == correctAnswer) {
+          correct.add(questionId);
+          incorrect.delete(questionId);
+          isCorrect = true;
+        } else {
+          incorrect.add(e.target.dataset.questionId);
+          correct.delete(questionId);
+        }
+        updateScore();
+
+        const resultClass = isCorrect ? 'correct-answer' : 'incorrect-answer';
+
+        form.querySelectorAll('.question-lable').forEach(label => {
+          label.classList.remove('correct-answer', 'incorrect-answer');
+        });
+        selectedOption.closest('.question-lable').classList.add(resultClass);
+      };
+
+      function renderExplanation(ev) {
+        const dataid = ev.target.dataset.explanationId;
+        const quiz = quizData.questions.find(q => q.id === Number(dataid));
+        modalTextElement.innerHTML =
+          quiz && quiz.prompt.explanation ? quiz.prompt.explanation : 'no explanation found';
+        // modalTextElement.innerHTML = ev.target.dataset?.explanation || 'no explanation found';
+        dialog.showModal();
+        dialog.addEventListener('click', event => {
+          if (event.target === dialog) {
+            dialog.close();
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
