@@ -7,9 +7,16 @@ from google.auth.transport import requests as google_requests
 from typing import Optional, Tuple
 from urllib.parse import urlencode
 
-# OAuth configuration
-GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
-GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+# OAuth configuration - check st.secrets first (Streamlit Cloud), then os.environ
+def get_secret(key: str, default: str = "") -> str:
+    """Get secret from Streamlit secrets or environment variables."""
+    try:
+        return st.secrets.get(key, os.environ.get(key, default))
+    except Exception:
+        return os.environ.get(key, default)
+
+GOOGLE_CLIENT_ID = get_secret("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_SECRET = get_secret("GOOGLE_CLIENT_SECRET")
 
 # Scopes for Google OAuth
 SCOPES = [
@@ -150,8 +157,8 @@ def get_redirect_uri() -> str:
     """
     Get the redirect URI for OAuth callback.
     """
-    # Use environment variable if set, otherwise default to localhost
-    redirect_uri = os.environ.get("OAUTH_REDIRECT_URI", "")
+    # Use st.secrets (Streamlit Cloud) or environment variable
+    redirect_uri = get_secret("OAUTH_REDIRECT_URI")
 
     if not redirect_uri:
         # Default to localhost for development
