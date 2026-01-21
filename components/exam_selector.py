@@ -1,10 +1,10 @@
 import streamlit as st
-from database.models import EXAM_CONFIG, DOMAINS, DOMAIN_WEIGHTS
+from database.models import EXAM_CONFIG, EXAM_DOMAINS
 
 
-def render_exam_selector(question_count: int):
+def render_exam_selector(question_counts: dict):
     """Render the exam selection screen."""
-    st.title("AWS Certification Practice Exam")
+    st.title("Practice Exam")
     st.markdown("---")
 
     col1, col2 = st.columns([2, 1])
@@ -18,6 +18,12 @@ def render_exam_selector(question_count: int):
         )
 
         config = EXAM_CONFIG[exam_type]
+        is_available = config.get('available', True)
+        question_count = question_counts.get(exam_type, 0)
+
+        # Show warning if exam not available
+        if not is_available:
+            st.warning("This exam is coming soon. Questions are not yet available in the database.")
 
         st.markdown("### Exam Information")
         st.markdown(f"""
@@ -29,13 +35,14 @@ def render_exam_selector(question_count: int):
         """)
 
         st.markdown("### Exam Domains")
-        for domain_id, domain_name in DOMAINS.items():
-            weight = DOMAIN_WEIGHTS[domain_id]
-            st.markdown(f"- **Domain {domain_id}:** {domain_name} ({weight}%)")
+        domains = EXAM_DOMAINS.get(exam_type, {})
+        for domain_id, domain_info in domains.items():
+            st.markdown(f"- **Domain {domain_id}:** {domain_info['name']} ({domain_info['weight']}%)")
 
     with col2:
         st.subheader("Practice Mode")
 
+        # Disable mode selection if exam not available
         mode = st.radio(
             "Select practice mode:",
             options=["full", "practice_10", "practice_20", "practice_30"],
@@ -44,7 +51,8 @@ def render_exam_selector(question_count: int):
                 "practice_10": "Quick Practice (10 questions)",
                 "practice_20": "Short Practice (20 questions)",
                 "practice_30": "Medium Practice (30 questions)"
-            }[x]
+            }[x],
+            disabled=not is_available
         )
 
         num_questions = {
@@ -54,9 +62,9 @@ def render_exam_selector(question_count: int):
             "practice_30": min(30, question_count)
         }[mode]
 
-        timed = st.checkbox("Enable Timer", value=True)
+        timed = st.checkbox("Enable Timer", value=True, disabled=not is_available)
 
-        if timed:
+        if timed and is_available:
             if mode == "full":
                 time_minutes = config['time_minutes']
             else:
@@ -72,15 +80,18 @@ def render_exam_selector(question_count: int):
         spaced_repetition = st.checkbox(
             "Use Spaced Repetition",
             value=False,
-            help="Prioritize questions you need to review based on your past performance (like Anki)"
+            help="Prioritize questions you need to review based on your past performance (like Anki)",
+            disabled=not is_available
         )
 
-        if spaced_repetition:
+        if spaced_repetition and is_available:
             st.info("Questions due for review will be prioritized. Rate your confidence after each answer to improve future sessions.")
 
         st.markdown("---")
 
-        if st.button("Start Exam", type="primary", use_container_width=True):
+        # Disable Start button if exam not available or no questions
+        can_start = is_available and question_count > 0
+        if st.button("Start Exam", type="primary", use_container_width=True, disabled=not can_start):
             return {
                 "exam_type": exam_type,
                 "mode": mode,

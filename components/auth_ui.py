@@ -27,7 +27,7 @@ def render_auth_page(auth_manager: AuthManager) -> Optional[User]:
         else:
             st.error(message)
 
-    st.title("AWS Solutions Architect Exam Trainer")
+    st.title("Practice Exam Trainer")
     st.markdown("---")
 
     # Center the auth form

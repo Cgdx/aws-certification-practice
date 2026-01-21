@@ -1,28 +1,48 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Set
 from database.models import Question, DOMAINS, DOMAIN_WEIGHTS
+
+
+def normalize_answer(answer: str) -> Set[str]:
+    """Normalize answer string to a set of uppercase letters."""
+    if not answer:
+        return set()
+    return set(a.strip().upper() for a in answer.split(',') if a.strip())
+
+
+def is_answer_correct(user_answer: str, correct_answer: str) -> bool:
+    """Check if user answer matches correct answer (supports multiple answers)."""
+    user_set = normalize_answer(user_answer)
+    correct_set = normalize_answer(correct_answer)
+    return user_set == correct_set
 
 
 def calculate_score(questions: List[Question], answers: Dict[int, str]) -> Tuple[int, int]:
     """
-    Calculate the total score.
+    Calculate the total score. Supports single and multiple answer questions.
+    Only counts questions that were answered.
 
     Returns:
-        Tuple of (correct_count, total_questions)
+        Tuple of (correct_count, answered_questions)
     """
     correct = 0
+    answered = 0
     for question in questions:
-        if answers.get(question.id) == question.correct_answer:
-            correct += 1
-    return correct, len(questions)
+        user_answer = answers.get(question.id, '')
+        if user_answer:  # Only count answered questions
+            answered += 1
+            if is_answer_correct(user_answer, question.correct_answer):
+                correct += 1
+    return correct, answered
 
 
 def calculate_domain_scores(questions: List[Question],
                             answers: Dict[int, str]) -> Dict[str, Tuple[int, int]]:
     """
-    Calculate scores by domain.
+    Calculate scores by domain. Supports single and multiple answer questions.
+    Only counts questions that were answered.
 
     Returns:
-        Dictionary mapping domain_id to (correct_count, total_in_domain)
+        Dictionary mapping domain_id to (correct_count, answered_in_domain)
     """
     domain_scores = {}
 
@@ -30,13 +50,17 @@ def calculate_domain_scores(questions: List[Question],
         domain_scores[domain_id] = [0, 0]
 
     for question in questions:
+        user_answer = answers.get(question.id, '')
+        if not user_answer:  # Skip unanswered questions
+            continue
+
         domain_id = question.domain
         if domain_id not in domain_scores:
             domain_scores[domain_id] = [0, 0]
 
         domain_scores[domain_id][1] += 1
 
-        if answers.get(question.id) == question.correct_answer:
+        if is_answer_correct(user_answer, question.correct_answer):
             domain_scores[domain_id][0] += 1
 
     return {k: tuple(v) for k, v in domain_scores.items()}

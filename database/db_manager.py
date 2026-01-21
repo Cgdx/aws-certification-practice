@@ -76,6 +76,14 @@ class DatabaseManager:
         if 'user_id' not in columns:
             cursor.execute('ALTER TABLE exam_sessions ADD COLUMN user_id INTEGER DEFAULT 1')
 
+        # Add question_id and num_correct columns to questions if not exists
+        cursor.execute("PRAGMA table_info(questions)")
+        columns = [col[1] for col in cursor.fetchall()]
+        if 'question_id' not in columns:
+            cursor.execute('ALTER TABLE questions ADD COLUMN question_id TEXT DEFAULT ""')
+        if 'num_correct' not in columns:
+            cursor.execute('ALTER TABLE questions ADD COLUMN num_correct INTEGER DEFAULT 1')
+
         conn.commit()
         conn.close()
 
@@ -85,8 +93,9 @@ class DatabaseManager:
 
         cursor.execute('''
             INSERT INTO questions (exam_type, domain, difficulty, question_text,
-                                   options, correct_answer, explanation, reference)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                                   options, correct_answer, explanation, reference,
+                                   question_id, num_correct)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             question.exam_type,
             question.domain,
@@ -95,7 +104,9 @@ class DatabaseManager:
             json.dumps(question.options),
             question.correct_answer,
             question.explanation,
-            question.reference
+            question.reference,
+            question.question_id,
+            question.num_correct
         ))
 
         question_id = cursor.lastrowid

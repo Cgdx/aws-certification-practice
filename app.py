@@ -9,11 +9,14 @@ from components.question_display import render_question, render_navigation
 from components.timer import render_timer, get_elapsed_time
 from components.results import render_results, render_history
 from components.auth_ui import render_auth_page, render_user_info
+from components.profile import render_profile_page
+from components.leaderboard import render_leaderboard_page
+from components.public_profile import render_public_profile_page
 from auth import AuthManager, User
-from utils.scoring import calculate_score, calculate_domain_scores, identify_weak_domains
+from utils.scoring import calculate_score, calculate_domain_scores, identify_weak_domains, is_answer_correct
 
 st.set_page_config(
-    page_title="AWS Certification Practice Exam",
+    page_title="Practice Exam",
     page_icon="",
     layout="wide"
 )
@@ -64,6 +67,8 @@ def init_session_state():
         st.session_state.checked_questions = set()
     if "rated_questions" not in st.session_state:
         st.session_state.rated_questions = set()
+    if "show_submit_confirm" not in st.session_state:
+        st.session_state.show_submit_confirm = False
     # Authentication state
     if "user" not in st.session_state:
         st.session_state.user = None
@@ -95,6 +100,7 @@ def start_exam(db: DatabaseManager, config: dict):
     st.session_state.submitted = False
     st.session_state.checked_questions = set()
     st.session_state.rated_questions = set()
+    st.session_state.show_submit_confirm = False
     st.session_state.page = "exam"
 
 
@@ -127,7 +133,7 @@ def submit_exam(db: DatabaseManager):
     st.session_state.page = "results"
 
 
-def render_exam_page(db: DatabaseManager):
+def render_exam_page(db: DatabaseManager, auth_manager):
     """Render the exam taking page."""
     config = st.session_state.exam_config
     questions = st.session_state.questions
@@ -222,41 +228,60 @@ def render_exam_page(db: DatabaseManager):
 
         # Show rating buttons after checking answer (for spaced repetition)
         if st.session_state.show_result and question.id not in st.session_state.rated_questions:
-            user_answer = st.session_state.answers.get(question.id)
-            was_correct = user_answer == question.correct_answer
+            user_answer = st.session_state.answers.get(question.id, '')
+            was_correct = is_answer_correct(user_answer, question.correct_answer)
 
             st.markdown("---")
             st.markdown("**Rate your confidence:** _(for spaced repetition)_")
+
+            # Show XP info
+            if was_correct:
+                base_xp = 10 + (question.difficulty * 2)
+                st.caption(f"Correct! You'll earn XP based on your rating.")
+            else:
+                st.caption("Incorrect - No XP awarded. Keep practicing!")
 
             rate_cols = st.columns(4)
 
             user_id = st.session_state.user_id or 1
 
+            # XP awards: correct answers get XP, rating affects bonus
+            # Again: +2 XP, Hard: +5 XP, Good: +10 XP, Easy: +15 XP
+            xp_rewards = {1: 2, 2: 5, 3: 10, 4: 15}
+
             with rate_cols[0]:
                 if st.button("Again", key=f"rate_1_{question.id}", use_container_width=True,
-                            help="Review again soon"):
+                            help="Review again soon (+2 XP if correct)"):
                     db.update_question_stats(question.id, was_correct, 1, user_id=user_id)
+                    if was_correct:
+                        auth_manager.add_experience(user_id, xp_rewards[1])
                     st.session_state.rated_questions.add(question.id)
                     st.rerun()
 
             with rate_cols[1]:
                 if st.button("Hard", key=f"rate_2_{question.id}", use_container_width=True,
-                            help="Was difficult, review sooner"):
+                            help="Was difficult, review sooner (+5 XP if correct)"):
                     db.update_question_stats(question.id, was_correct, 2, user_id=user_id)
+                    if was_correct:
+                        auth_manager.add_experience(user_id, xp_rewards[2])
                     st.session_state.rated_questions.add(question.id)
                     st.rerun()
 
             with rate_cols[2]:
                 if st.button("Good", key=f"rate_3_{question.id}", use_container_width=True,
-                            help="Normal review interval"):
+                            help="Normal review interval (+10 XP if correct)"):
                     db.update_question_stats(question.id, was_correct, 3, user_id=user_id)
+                    if was_correct:
+                        auth_manager.add_experience(user_id, xp_rewards[3])
                     st.session_state.rated_questions.add(question.id)
                     st.rerun()
 
             with rate_cols[3]:
                 if st.button("Easy", key=f"rate_4_{question.id}", use_container_width=True,
-                            help="Too easy, review later"):
+                            help="Too easy, review later (+15 XP if correct)"):
                     db.update_question_stats(question.id, was_correct, 4, user_id=user_id)
+                    if was_correct:
+                        auth_manager.add_experience(user_id, xp_rewards[4])
                     st.session_state.rated_questions.add(question.id)
                     st.rerun()
 
@@ -279,8 +304,8 @@ def render_exam_page(db: DatabaseManager):
             is_marked_q = q_num in st.session_state.marked_questions
 
             # Check if answer is correct (only matters if checked)
-            user_answer = st.session_state.answers.get(q.id)
-            is_correct = user_answer == q.correct_answer if user_answer else False
+            user_answer = st.session_state.answers.get(q.id, '')
+            is_correct = is_answer_correct(user_answer, q.correct_answer) if user_answer else False
 
             with cols[col_idx]:
                 # Determine background color based on answer status
@@ -324,21 +349,28 @@ def render_exam_page(db: DatabaseManager):
 
         st.markdown("---")
 
-        if st.button("Submit Exam", type="primary", use_container_width=True):
-            unanswered = total - len(st.session_state.answers)
-            if unanswered > 0:
-                st.warning(f"You have {unanswered} unanswered questions. Are you sure?")
-                col_yes, col_no = st.columns(2)
-                with col_yes:
-                    if st.button("Yes, Submit", use_container_width=True):
-                        submit_exam(db)
-                        st.rerun()
-                with col_no:
-                    if st.button("No, Continue", use_container_width=True):
-                        st.rerun()
-            else:
-                submit_exam(db)
-                st.rerun()
+        unanswered = total - len(st.session_state.answers)
+
+        if not st.session_state.show_submit_confirm:
+            if st.button("Submit Exam", type="primary", use_container_width=True):
+                if unanswered > 0:
+                    st.session_state.show_submit_confirm = True
+                    st.rerun()
+                else:
+                    submit_exam(db)
+                    st.rerun()
+        else:
+            st.warning(f"You have {unanswered} unanswered questions. Are you sure you want to submit?")
+            col_yes, col_no = st.columns(2)
+            with col_yes:
+                if st.button("Yes, Submit", type="primary", use_container_width=True):
+                    st.session_state.show_submit_confirm = False
+                    submit_exam(db)
+                    st.rerun()
+            with col_no:
+                if st.button("No, Continue", use_container_width=True):
+                    st.session_state.show_submit_confirm = False
+                    st.rerun()
 
 
 def render_results_page(db: DatabaseManager):
@@ -392,30 +424,33 @@ def main():
     user_id = st.session_state.user_id
 
     with st.sidebar:
-        st.title("AWS Practice Exam")
-
-        # Show user info and logout button
-        render_user_info(user)
-
-        st.markdown("---")
-
-        if st.session_state.page != "home":
-            if st.button("Home", use_container_width=True):
-                st.session_state.page = "home"
+        # Header with title and sign out button
+        header_col1, header_col2 = st.columns([3, 1])
+        with header_col1:
+            st.title("Practice Exam")
+        with header_col2:
+            st.write("")  # Spacer
+            if st.button("🚪", help="Sign Out", use_container_width=True):
+                if 'user' in st.session_state:
+                    del st.session_state['user']
+                if 'user_id' in st.session_state:
+                    del st.session_state['user_id']
                 st.rerun()
 
         st.markdown("---")
-        st.markdown("### About")
-        st.markdown("""
-        Practice for your AWS certification exam with realistic questions
-        covering all domains.
 
-        **Features:**
-        - Timed exams
-        - Difficulty progression
-        - Domain-based scoring
-        - Detailed explanations
-        """)
+        # Navigation menu - vertical with icons and titles
+        if st.button("🏠  Home", use_container_width=True, type="secondary"):
+            st.session_state.page = "home"
+            st.rerun()
+
+        if st.button("👤  Profile", use_container_width=True, type="secondary"):
+            st.session_state.page = "profile"
+            st.rerun()
+
+        if st.button("🏆  Ranking", use_container_width=True, type="secondary"):
+            st.session_state.page = "leaderboard"
+            st.rerun()
 
         st.markdown("---")
 
@@ -437,17 +472,47 @@ def main():
             st.progress(progress["avg_success_rate"] / 100)
             st.caption(f"Success rate: {progress['avg_success_rate']:.1f}%")
 
+        st.markdown("---")
+        st.markdown("### About")
+        st.markdown("""
+        Practice for your AWS certification exam with realistic questions
+        covering all domains.
+
+        **Features:**
+        - Timed exams
+        - Difficulty progression
+        - Domain-based scoring
+        - Detailed explanations
+        """)
+
+        st.markdown("---")
+        st.caption("© Practice Exams 2026")
+
     if st.session_state.page == "home":
-        config = render_exam_selector(db.get_question_count("SAA-C03"))
+        # Get question counts for all exam types
+        question_counts = {
+            exam_type: db.get_question_count(exam_type)
+            for exam_type in EXAM_CONFIG.keys()
+        }
+        config = render_exam_selector(question_counts)
         if config:
             start_exam(db, config)
             st.rerun()
 
     elif st.session_state.page == "exam":
-        render_exam_page(db)
+        render_exam_page(db, auth_manager)
 
     elif st.session_state.page == "results":
         render_results_page(db)
+
+    elif st.session_state.page == "profile":
+        render_profile_page(user, auth_manager)
+
+    elif st.session_state.page == "leaderboard":
+        render_leaderboard_page(user, auth_manager)
+
+    elif st.session_state.page == "public_profile":
+        render_public_profile_page(user, auth_manager)
 
 
 if __name__ == "__main__":
