@@ -1,0 +1,14 @@
+[
+  {
+    "question_id": "SAA-C03-0212",
+    "current_answer": "B",
+    "num_expected": 3,
+    "text_preview": "What does this AWS CloudFormation snippet do? (Select three) SecurityGroupIngres"
+  },
+  {
+    "question_id": "SAA-C03-0345",
+    "current_answer": "A",
+    "num_expected": 3,
+    "text_preview": "The engineering team at a multi-national company uses AWS Firewall Manager to ce"
+  }
+]
